@@ -23,6 +23,7 @@ package network.brightspots.rcv;
 
 import static network.brightspots.rcv.CastVoteRecord.StatusForRound;
 import static network.brightspots.rcv.Utils.isNullOrBlank;
+import static network.brightspots.rcv.PairwiseCounting;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -247,8 +248,11 @@ final class Tabulator {
         // b) we've found our winner, but we're continuing until we have only two candidates
         // c) not all remaining candidates meet the bottoms-up threshold
 
+        // Count the number of continuing candidates.
+        int countOfContinuingCandidates = countContinuingCandidates() ;
+
         List<TallyDecision> eliminated;
-        // Four mutually exclusive ways to eliminate candidates.
+        // Five mutually exclusive ways to eliminate candidates.
         // 1. Some races contain undeclared write-ins that should be dropped immediately.
         eliminated = dropUndeclaredWriteIns(currentRoundTally);
         // 2. if we have a cutoffThreshold, eliminate everyone under it
@@ -259,8 +263,27 @@ final class Tabulator {
         if (eliminated.isEmpty()) {
           eliminated = doBatchElimination(currentRoundTallyToCandidates);
         }
-        // 4. If we didn't do batch elimination, eliminate the remaining candidate with the lowest
-        //    tally, breaking a tie if needed.
+
+        // Specify maximumNumberOfCandidatesForPairwiseCounting.
+        // Later this number will be assigned by user.
+        // Use a value of zero to turn off this option.
+        // A value of 1 or 2 is ignored because that cannot change who wins.
+        int maximumNumberOfCandidatesForPairwiseCounting = 5 ;
+
+        // 4. Otherwise, possibly eliminate a pairwise losing candidate.
+        // A counting round cannot have more than one pairwise losing candidate.
+        if ((eliminated.isEmpty())
+        && ((maximumNumberOfCandidatesForPairwiseCounting > 2)
+        && (countOfContinuingCandidates <= maximumNumberOfCandidatesForPairwiseCounting)) {
+          String candidateNamePairwiseLosingCandidate = getPairwiseLosingCandidate() {
+          if(candidateNamePairwiseLosingCandidate != null) {
+            eliminated = currentRoundTally.getCandidates().stream().map(candidate ->
+            new TallyDecision(candidate, TallyDecision.DecisionType.ELIMINATED, false, currentRound)
+            ).toList();
+          }
+        }
+        // 5. If we haven't yet eliminated at least one candidate,
+        // eliminate the remaining candidate with the lowest tally, breaking a tie if needed.
         if (eliminated.isEmpty()) {
           eliminated = doRegularElimination(currentRoundTallyToCandidates);
         }
@@ -557,6 +580,18 @@ final class Tabulator {
     }
     return status;
   }
+
+  // Count number of continuing candidates.
+  public int countContinuingCandidates() {
+    int numberOfContinuingCandidates = 0;
+    for (String candidate : candidates) {
+      String candidateName = config.getNameForCandidate(candidate);
+      if (isCandidateContinuing(candidateName)) {
+        numberOfContinuingCandidates ++;
+      }
+    }
+    return numberOfContinuingCandidates;
+  }    
 
   // determine if one or more winners have been identified in this round
   // param: currentRoundTally round tally for a particular round
