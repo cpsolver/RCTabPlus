@@ -94,3 +94,7 @@ fabric.properties
 
 # Other random IntelliJ config?
 .idea/misc.xml
+
+# Sublime Text Editor
+*.sublime-project
+*.sublime-workspace
