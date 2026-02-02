@@ -23,21 +23,24 @@
 
 package network.brightspots.rcv;
 
-import static network.brightspots.rcv.CastVoteRecord.StatusForRound;
 
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import javafx.util.Pair;
+import java.util.HashMap;
 import network.brightspots.rcv.ContestConfig.getCandidateNames;
 import network.brightspots.rcv.ContestConfig.getNameForCandidate;
+import network.brightspots.rcv.ContestConfig.getNumberOfWinners;
+import network.brightspots.rcv.ContestConfig.countContinuingCandidates;
 import network.brightspots.rcv.Tabulator.isCandidateContinuing;
+import network.brightspots.rcv.CastVoteRecord.StatusForRound;
 
 final class PairwiseCounting {
 
-  private enum PairwiseWinLoseTie {
+  public enum PairwiseWinLoseTie {
     WIN,
     LOSE,
     TIE,
@@ -49,7 +52,7 @@ final class PairwiseCounting {
   // List of names of continuing candidates, but must not exceed above limit.
   private static List<String> listOfCandidateNamesForPairwiseCounting = new ArrayList<>(10);
   // Associate each continuing candidate name with a position in the pairwise counting array.
-  private static HashMap<String, Integer> indexForCandidateName = new HashMap<String, Integer>;
+  private static HashMap<String, Integer> indexForCandidateName = new HashMap<>();
   private static BigDecimal[][] pairwiseCountForFirstOverSecondInPair;
   private static boolean haveCurrentPairwiseCounts = false;
 
@@ -59,7 +62,7 @@ final class PairwiseCounting {
     listOfCandidateNamesForPairwiseCounting.clear();
     Integer candidateIndex = 0;
     for (String candidate : ContestConfig.getCandidateNames()) {
-      String candidateName = config.getNameForCandidate(candidate);
+      String candidateName = ContestConfig.getNameForCandidate(candidate);
       // Limit to continuing candidates
       if (isCandidateContinuing(candidateName)) {
         // List is empty if continuing candidate count would exceed expected limit.
@@ -77,11 +80,10 @@ final class PairwiseCounting {
   }
 
   // Put zeros into two-dimensional array that will store pairwise counts.
-  private void initializePairwiseCounts();
+  private void initializePairwiseCounts() {
     int numberOfCandidatesInPairwiseCounting = listOfCandidateNamesForPairwiseCounting.size();
-    for (int candidateFirstIndex = 1;
-        candidateFirstIndex <= numberOfCandidatesInPairwiseCounting;
-        candidateFirstIndex++) {
+    for (int candidateFirstIndex = 1; candidateFirstIndex <=
+        numberOfCandidatesInPairwiseCounting; candidateFirstIndex++) {
       for (int candidateSecondIndex = 1;
           candidateSecondIndex <= numberOfCandidatesInPairwiseCounting;
           candidateSecondIndex++) {
@@ -95,9 +97,9 @@ final class PairwiseCounting {
 
   // Get win or lose or tie result for any one-on-one contest
   // between any two continuing candidates.
-  private boolean getWinLoseTieForCandidatePair(
-      string candidateNameFirstInPair,
-      string candidateNameSecondInPair) {
+  private PairwiseWinLoseTie getWinLoseTieForCandidatePair(
+      String candidateNameFirstInPair,
+      String candidateNameSecondInPair) {
     int candidateFirstIndex = indexForCandidateName.get(candidateNameFirstInPair);
     int candidateSecondIndex = indexForCandidateName.get(candidateNameSecondInPair);
     if (candidateFirstIndex == candidateSecondIndex) {
@@ -124,14 +126,14 @@ final class PairwiseCounting {
   // Returns: True if pairwise counting done, false if not done.
   public boolean doPairwiseCounting() {
     // Pairwise counts do not change if only one candidate can win.
-    if ((haveCurrentPairwiseCounts) && (getNumberOfWinners() < 2) {
+    if ((haveCurrentPairwiseCounts) && (ContestConfig.getNumberOfWinners() < 2)) {
       return false ;
     }
     // Pairwise counting is not done if there are too many continuing candidates,
     // or if there are only two continuing candidates.
-    int numberOfContinuingCandidates = countContinuingCandidates();
+    int numberOfContinuingCandidates = ContestConfig.countContinuingCandidates();
     if ((numberOfContinuingCandidates < 3)
-    || (numberOfContinuingCandidates > maximumCandidatesForPairwiseCounting) {
+    || (numberOfContinuingCandidates > maximumCandidatesForPairwiseCounting)) {
       return false;
     }
     generateListOfCandidateNamesForPairwiseCounting();
@@ -191,18 +193,18 @@ final class PairwiseCounting {
               candidateFirstIndex][candidateSecondIndex].add(transferAmount);
           } else if (comparisonOneIfGreaterMinusIfLess < 0) {
             pairwiseCountForFirstOverSecondInPair[
-              candidateSecondIndex][candidateFirstIndex].add(transferAmount)
+              candidateSecondIndex][candidateFirstIndex].add(transferAmount);
           }
         }
       }
     } // End looping over all ballots.
     haveCurrentPairwiseCounts = true;
-    return;
+    return true;
   }
 
   // If there is a pairwise losing candidate, return its name.
   // Otherwise return null.
-  public string getPairwiseLosingCandidate() {
+  public String getPairwiseLosingCandidate() {
     String candidateNamePairwiseLosingCandidate = null ;
     boolean encounteredOnlyLosses = false;
     int numberOfCandidatesInPairwiseCounting = listOfCandidateNamesForPairwiseCounting.size();
@@ -227,17 +229,16 @@ final class PairwiseCounting {
         if (!isCandidateContinuing(listOfCandidateNamesForPairwiseCounting[candidateSecondIndex])) {
           continue;
         }
+        // Get candidate names based on pairwise index numbers.
+        String candidateNameFirstInPair = listOfCandidateNamesForPairwiseCounting[candidateFirstIndex];
+        String candidateNameSecondInPair = listOfCandidateNamesForPairwiseCounting[candidateSecondIndex];
         // If first-in-pair candidate does not lose,
         // this first-in-pair candidate cannot be pairwise losing candidate.
-        if (getWinLoseTieForCandidatePair(
-            string candidateNameFirstInPair,
-            string candidateNameSecondInPair) ==
-            PairwiseWinLoseTie.LOSE ) {
+        if (getWinLoseTieForCandidatePair(candidateNameFirstInPair,
+            candidateNameSecondInPair) == PairwiseWinLoseTie.LOSE) {
           encounteredOnlyLosses = false;
           break;
         }
-        // Get candidate name in outer loop in case this is pairwise losing candidate.
-        String candidateNameFirstInPair = listOfCandidateNamesForPairwiseCounting[candidateFirstIndex];
       } // Repeat inner loop through candidates.
       // If candidate lost every pairwise contest, is pairwise losing candidate.
       // There cannot be a second pairwise losing candidate in the same counting round.
@@ -265,11 +266,11 @@ final class PairwiseCounting {
     int pairwiseRow = 1;
     // Loop through candidates in reverse order of elimination.
     // (Might need to invert sequence here)
-    for (candidateNameFirst : eliminationSequence) {
+    for (String candidateNameFirst : eliminationSequence) {
       int candidateFirstIndex = indexForCandidateName.get(candidateNameFirst);
       int pairwiseColumn = 1;
       // (Might need to invert sequence here)
-      for (candidateNameSecond : eliminationSequence) {
+      for (String candidateNameSecond : eliminationSequence) {
         int candidateSecondIndex = indexForCandidateName.get(candidateNameSecond);
         // Log pairwise count for first candidate over second candidate.
         Logger.info(
@@ -293,3 +294,4 @@ final class PairwiseCounting {
     }
     Logger.info("[INFO] [End pairwise counts]");
   }
+}
