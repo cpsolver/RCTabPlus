@@ -21,9 +21,9 @@
 
 package network.brightspots.rcv;
 
-import static network.brightspots.rcv.CastVoteRecord.StatusForRound;
-import static network.brightspots.rcv.Utils.isNullOrBlank;
-import static network.brightspots.rcv.PairwiseCounting;
+import network.brightspots.rcv.CastVoteRecord.StatusForRound;
+import network.brightspots.rcv.Utils.isNullOrBlank;
+import network.brightspots.rcv.PairwiseCounting;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -41,7 +41,9 @@ import java.util.TreeMap;
 import javafx.util.Pair;
 import network.brightspots.rcv.CastVoteRecord.VoteOutcomeType;
 import network.brightspots.rcv.ContestConfig.TabulateBySlice;
+import network.brightspots.rcv.PairwiseCounting.getPairwiseLosingCandidate;
 import network.brightspots.rcv.OutputWriter.RoundSnapshotDataMissingException;
+import network.brightspots.rcv.RawContestConfig.candidates;
 
 final class Tabulator {
 
@@ -125,9 +127,18 @@ final class Tabulator {
             slice, slice.toString().toLowerCase());
         throw new TabulationAbortedException(false);
       }
-
       initTabulateBySliceRoundTallies(slice);
     }
+  }
+
+  // Access to current round number
+  public int getCurrentRoundNumber() {
+    return currentRound;
+  }
+
+  // Access to when candidates were eliminated
+  public int getCandidateToRoundEliminated() {
+    return candidateToRoundEliminated;
   }
 
   // Utility function to "invert" the input roundTally map into a sorted map of tally
@@ -272,10 +283,9 @@ final class Tabulator {
 
         // 4. Otherwise, possibly eliminate a pairwise losing candidate.
         // A counting round cannot have more than one pairwise losing candidate.
-        if ((eliminated.isEmpty())
-        && ((maximumNumberOfCandidatesForPairwiseCounting > 2)
-        && (countOfContinuingCandidates <= maximumNumberOfCandidatesForPairwiseCounting)) {
-          String candidateNamePairwiseLosingCandidate = getPairwiseLosingCandidate() {
+        boolean configUsePairwiseCounting = true;
+        if (eliminated.isEmpty() && configUsePairwiseCounting) {
+          String candidateNamePairwiseLosingCandidate = getPairwiseLosingCandidate();
           if(candidateNamePairwiseLosingCandidate != null) {
             eliminated = currentRoundTally.getCandidates().stream().map(candidate ->
             new TallyDecision(candidate, TallyDecision.DecisionType.ELIMINATED, false, currentRound)
@@ -560,7 +570,7 @@ final class Tabulator {
 
   // Handles continued tabulation after a winner has been chosen when
   // continueUntilTwoCandidatesRemain is true.
-  private boolean isCandidateContinuing(String candidate) {
+  public boolean isCandidateContinuing(String candidate) {
     CandidateStatus status = getCandidateStatus(candidate);
     return status == CandidateStatus.CONTINUING
         || (status == CandidateStatus.WINNER && config.isContinueUntilTwoCandidatesRemainEnabled());
@@ -584,7 +594,7 @@ final class Tabulator {
   // Count number of continuing candidates.
   public int countContinuingCandidates() {
     int numberOfContinuingCandidates = 0;
-    for (String candidate : candidates) {
+    for (String candidate : RawConfig.candidates) {
       String candidateName = config.getNameForCandidate(candidate);
       if (isCandidateContinuing(candidateName)) {
         numberOfContinuingCandidates ++;
