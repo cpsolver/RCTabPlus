@@ -21,10 +21,6 @@
 
 package network.brightspots.rcv;
 
-import network.brightspots.rcv.CastVoteRecord.StatusForRound;
-import network.brightspots.rcv.Utils.isNullOrBlank;
-import network.brightspots.rcv.PairwiseCounting;
-
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.Arrays;
@@ -39,6 +35,8 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import javafx.util.Pair;
+import network.brightspots.rcv.CastVoteRecord.StatusForRound;
+import network.brightspots.rcv.Utils.isNullOrBlank;
 import network.brightspots.rcv.CastVoteRecord.VoteOutcomeType;
 import network.brightspots.rcv.ContestConfig.TabulateBySlice;
 import network.brightspots.rcv.PairwiseCounting.getPairwiseLosingCandidate;

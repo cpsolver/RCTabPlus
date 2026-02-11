@@ -23,25 +23,14 @@
 
 package network.brightspots.rcv;
 
-import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.Arrays;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import network.brightspots.rcv.ContestConfig.getCandidateNames;
-import network.brightspots.rcv.ContestConfig.getNameForCandidate;
-import network.brightspots.rcv.ContestConfig.getNumberOfWinners;
-import network.brightspots.rcv.Tabulator.countContinuingCandidates;
-import network.brightspots.rcv.Tabulator.isCandidateContinuing;
-import network.brightspots.rcv.Tabulator.getCurrentRoundNumber;
-import network.brightspots.rcv.CastVoteRecord.StatusForRound;
+import java.util.Arrays;
+import java.lang.Iterable;
+import javafx.util.Pair;
 import network.brightspots.rcv.BaseCvrReader.CastVoteRecords;
-import network.brightspots.rcv.CandidateRankingsList.maxRankingNumber;
-import network.brightspots.rcv.Logger.info;
 
 final class PairwiseCounting {
 
@@ -156,7 +145,6 @@ final class PairwiseCounting {
       // Get the transfer value for this cast vote record, which can be
       // less than one if election has multiple winners.
       BigDecimal transferValue = cvr.getFractionalTransferValue();
-      HashMap<String, Integer> rankingForCandidate = new HashMap<String, Integer>();
       // Assume same maximum number of continuing candidates as declared at beginning.
       int[] rankingForCandidateIndex = new int[10];
       // Initialize rankings for one ballot, in case any candidates are not ranked.
@@ -260,6 +248,7 @@ final class PairwiseCounting {
 
   public void logPairwiseCounts() {
     // Determine sequence in which candidates were eliminated.
+    Map<String, Integer> candidateToRoundEliminated = getCandidateToRoundEliminated();
     Map<String, Integer> eliminationSequence = candidateToRoundEliminated.entrySet()
         .stream()
         .sorted(Map.Entry.comparingByValue())
