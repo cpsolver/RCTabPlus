@@ -135,7 +135,7 @@ final class Tabulator {
   }
 
   // Access to when candidates were eliminated
-  public int getCandidateToRoundEliminated() {
+  public Map<String, Integer> getCandidateToRoundEliminated() {
     return candidateToRoundEliminated;
   }
 
