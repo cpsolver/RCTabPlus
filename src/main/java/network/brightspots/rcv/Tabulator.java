@@ -37,9 +37,9 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import javafx.util.Pair;
+import network.brightspots.rcv.CandidatesAtRanking.CandidatesAtRankingIterator;
 import network.brightspots.rcv.CastVoteRecord.StatusForRound;
 import network.brightspots.rcv.CastVoteRecord.VoteOutcomeType;
-import network.brightspots.rcv.CastVoteRecord.CandidatesAtRanking;
 import network.brightspots.rcv.ContestConfig.TabulateBySlice;
 import network.brightspots.rcv.OutputWriter.RoundSnapshotDataMissingException;
 
@@ -287,7 +287,8 @@ final class Tabulator {
         boolean configUsePairwiseCounting = true;
         if (eliminated.isEmpty() && configUsePairwiseCounting) {
           pairwiseCounting.doPairwiseCounting();
-          String candidateNamePairwiseLosingCandidate = pairwiseCounting.getPairwiseLosingCandidate();
+          String candidateNamePairwiseLosingCandidate = 
+              pairwiseCounting.getPairwiseLosingCandidate();
           if (candidateNamePairwiseLosingCandidate != null) {
             eliminated = List.of(
                 new TallyDecision(
