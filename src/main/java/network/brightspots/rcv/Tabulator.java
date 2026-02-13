@@ -21,6 +21,8 @@
 
 package network.brightspots.rcv;
 
+import static network.brightspots.rcv.Utils.isNullOrBlank;
+
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.Arrays;
@@ -36,12 +38,10 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import javafx.util.Pair;
 import network.brightspots.rcv.CastVoteRecord.StatusForRound;
-import network.brightspots.rcv.Utils.isNullOrBlank;
 import network.brightspots.rcv.CastVoteRecord.VoteOutcomeType;
+import network.brightspots.rcv.CastVoteRecord.CandidatesAtRanking;
 import network.brightspots.rcv.ContestConfig.TabulateBySlice;
-import network.brightspots.rcv.PairwiseCounting.getPairwiseLosingCandidate;
 import network.brightspots.rcv.OutputWriter.RoundSnapshotDataMissingException;
-import network.brightspots.rcv.RawContestConfig.candidates;
 
 final class Tabulator {
 
@@ -97,12 +97,15 @@ final class Tabulator {
   private final SliceIdSet sliceIds = new SliceIdSet();
   // tracks the current round (and when tabulation is completed, the total number of rounds)
   private int currentRound = 0;
+  // tracks pairwise counting
+  private PairwiseCounting pairwiseCounting;
 
   Tabulator(List<CastVoteRecord> castVoteRecords, ContestConfig config)
       throws TabulationAbortedException {
     this.castVoteRecords = castVoteRecords;
     this.candidateNames = config.getCandidateNames();
     this.config = config;
+    this.pairwiseCounting = new PairwiseCounting(this, castVoteRecords, config);
 
     sliceIds.initialize(ContestConfig.TabulateBySlice.BATCH);
     sliceIds.initialize(ContestConfig.TabulateBySlice.PRECINCT);
@@ -258,7 +261,7 @@ final class Tabulator {
         // c) not all remaining candidates meet the bottoms-up threshold
 
         // Count the number of continuing candidates.
-        int countOfContinuingCandidates = countContinuingCandidates() ;
+        int countOfContinuingCandidates = countContinuingCandidates();
 
         List<TallyDecision> eliminated;
         // Five mutually exclusive ways to eliminate candidates.
@@ -277,17 +280,22 @@ final class Tabulator {
         // Later this number will be assigned by user.
         // Use a value of zero to turn off this option.
         // A value of 1 or 2 is ignored because that cannot change who wins.
-        int maximumNumberOfCandidatesForPairwiseCounting = 5 ;
+        int maximumNumberOfCandidatesForPairwiseCounting = 5;
 
         // 4. Otherwise, possibly eliminate a pairwise losing candidate.
         // A counting round cannot have more than one pairwise losing candidate.
         boolean configUsePairwiseCounting = true;
         if (eliminated.isEmpty() && configUsePairwiseCounting) {
-          String candidateNamePairwiseLosingCandidate = getPairwiseLosingCandidate();
-          if(candidateNamePairwiseLosingCandidate != null) {
-            eliminated = currentRoundTally.getCandidates().stream().map(candidate ->
-            new TallyDecision(candidate, TallyDecision.DecisionType.ELIMINATED, false, currentRound)
-            ).toList();
+          pairwiseCounting.doPairwiseCounting();
+          String candidateNamePairwiseLosingCandidate = pairwiseCounting.getPairwiseLosingCandidate();
+          if (candidateNamePairwiseLosingCandidate != null) {
+            eliminated = List.of(
+                new TallyDecision(
+                    candidateNamePairwiseLosingCandidate,
+                    TallyDecision.DecisionType.ELIMINATED,
+                    false,
+                    currentRound)
+            );
           }
         }
         // 5. If we haven't yet eliminated at least one candidate,
@@ -592,14 +600,13 @@ final class Tabulator {
   // Count number of continuing candidates.
   public int countContinuingCandidates() {
     int numberOfContinuingCandidates = 0;
-    for (String candidate : RawConfig.candidates) {
-      String candidateName = config.getNameForCandidate(candidate);
-      if (isCandidateContinuing(candidateName)) {
-        numberOfContinuingCandidates ++;
+    for (String candidate : config.getCandidateNames()) {
+      if (isCandidateContinuing(candidate)) {
+        numberOfContinuingCandidates++;
       }
     }
     return numberOfContinuingCandidates;
-  }    
+  }
 
   // determine if one or more winners have been identified in this round
   // param: currentRoundTally round tally for a particular round

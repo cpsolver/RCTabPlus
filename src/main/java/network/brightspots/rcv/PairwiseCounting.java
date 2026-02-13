@@ -24,13 +24,14 @@
 package network.brightspots.rcv;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.Arrays;
-import java.lang.Iterable;
+import java.util.List;
+import java.util.stream.Collectors;
 import javafx.util.Pair;
-import network.brightspots.rcv.BaseCvrReader.CastVoteRecords;
+import network.brightspots.rcv.CastVoteRecord.CandidatesAtRanking;
 
 final class PairwiseCounting {
 
@@ -41,36 +42,48 @@ final class PairwiseCounting {
     SAME_CANDIDATE
   }
 
+  private final Tabulator tabulator;
+  private final List<CastVoteRecord> castVoteRecords;
+  private final ContestConfig config;
+
   // Number of candidates for pairwise counting cannot exceed this limit.
   private final int maximumCandidatesForPairwiseCounting = 10;
   // List of names of continuing candidates, but must not exceed above limit.
-  private static Array<String> arrayOfCandidateNamesForPairwiseCounting = new Array<>(10);
+  private ArrayList<String> arrayOfCandidateNamesForPairwiseCounting = new ArrayList<>(10);
   // Associate each continuing candidate name with a position in the pairwise counting array.
-  private static HashMap<String, Integer> indexForCandidateName = new HashMap<>();
-  private static BigDecimal[][] pairwiseCountForFirstOverSecondInPair;
-  private static boolean haveCurrentPairwiseCounts = false;
+  private HashMap<String, Integer> indexForCandidateName = new HashMap<>();
+  private BigDecimal[][] pairwiseCountForFirstOverSecondInPair;
+  private boolean haveCurrentPairwiseCounts = false;
+
+  PairwiseCounting(Tabulator tabulator, List<CastVoteRecord> castVoteRecords, ContestConfig config) {
+    this.tabulator = tabulator;
+    this.castVoteRecords = castVoteRecords;
+    this.config = config;
+    this.pairwiseCountForFirstOverSecondInPair = 
+        new BigDecimal[maximumCandidatesForPairwiseCounting + 1][maximumCandidatesForPairwiseCounting + 1];
+  }
 
   // Generate list of candidate names for pairwise counting.
   // Output: list based on arrayOfCandidateNamesForPairwiseCounting
   private void generateListOfCandidateNamesForPairwiseCounting() {
     arrayOfCandidateNamesForPairwiseCounting.clear();
+    indexForCandidateName.clear();
     Integer candidateIndex = 0;
-    for (String candidate : getCandidateNames()) {
-      String candidateName = getNameForCandidate(candidate);
+    for (String candidate : config.getCandidateNames()) {
       // Limit to continuing candidates
-      if (isCandidateContinuing(candidateName)) {
+      if (tabulator.isCandidateContinuing(candidate)) {
         // List is empty if continuing candidate count would exceed expected limit.
         if (candidateIndex >= maximumCandidatesForPairwiseCounting) {
           arrayOfCandidateNamesForPairwiseCounting.clear();
+          indexForCandidateName.clear();
           return;
         }
-        arrayOfCandidateNamesForPairwiseCounting.add(candidateName);
+        arrayOfCandidateNamesForPairwiseCounting.add(candidate);
         // Index numbers start at 1, not 0.
-        candidateIndex ++;
-        indexForCandidateName.put(candidateName, candidateIndex);
+        candidateIndex++;
+        indexForCandidateName.put(candidate, candidateIndex);
       }
     }
-    return;
   }
 
   // Put zeros into two-dimensional array that will store pairwise counts.
@@ -120,12 +133,12 @@ final class PairwiseCounting {
   // Returns: True if pairwise counting done, false if not done.
   public boolean doPairwiseCounting() {
     // Pairwise counts do not change if only one candidate can win.
-    if ((haveCurrentPairwiseCounts) && (getNumberOfWinners() < 2)) {
-      return false ;
+    if ((haveCurrentPairwiseCounts) && (config.getNumberOfWinners() < 2)) {
+      return false;
     }
     // Pairwise counting is not done if there are too many continuing candidates,
     // or if there are only two continuing candidates.
-    int numberOfContinuingCandidates = countContinuingCandidates();
+    int numberOfContinuingCandidates = tabulator.countContinuingCandidates();
     if ((numberOfContinuingCandidates < 3)
     || (numberOfContinuingCandidates > maximumCandidatesForPairwiseCounting)) {
       return false;
@@ -133,20 +146,20 @@ final class PairwiseCounting {
     generateListOfCandidateNamesForPairwiseCounting();
     int numberOfCandidatesInPairwiseCounting = arrayOfCandidateNamesForPairwiseCounting.size();
     initializePairwiseCounts();
-    int maxRankNumberPlusOne = maxRankingNumber() + 1;
-    int currentRound = getCurrentRoundNumber();
+    int currentRound = tabulator.getCurrentRoundNumber();
     Logger.info("Doing pairwise counting in round: %d", currentRound);
     // Loop through cast vote records.
     for (CastVoteRecord cvr : castVoteRecords) {
       // Ignore cast vote record with no rankings.
-      if (numRankings() == 0) {
+      if (cvr.candidateRankings.numRankings() == 0) {
     	  continue;
       }
       // Get the transfer value for this cast vote record, which can be
       // less than one if election has multiple winners.
       BigDecimal transferValue = cvr.getFractionalTransferValue();
       // Assume same maximum number of continuing candidates as declared at beginning.
-      int[] rankingForCandidateIndex = new int[10];
+      int[] rankingForCandidateIndex = new int[maximumCandidatesForPairwiseCounting + 1];
+      int maxRankNumberPlusOne = cvr.candidateRankings.maxRankingNumber() + 1;
       // Initialize rankings for one ballot, in case any candidates are not ranked.
       for (int candidateIndex = 1;
           candidateIndex <= numberOfCandidatesInPairwiseCounting;
@@ -154,7 +167,7 @@ final class PairwiseCounting {
         rankingForCandidateIndex[candidateIndex] = maxRankNumberPlusOne;
       }
       // Iterate over all ranks in this cast vote record.
-      for (Pair<Integer, CandidatesAtRanking> rankForCandidateName : CandidateRankingsList) {
+      for (Pair<Integer, CandidatesAtRanking> rankForCandidateName : cvr.candidateRankings) {
         Integer rank = rankForCandidateName.getKey();
         CandidatesAtRanking candidatesAtRanking = rankForCandidateName.getValue();
         // Ignore rankings that have no candidates.
@@ -165,6 +178,9 @@ final class PairwiseCounting {
         // Iterate over candidates that have this ranking.
         for (String candidateName : candidatesAtRanking) {
           Integer candidateIndex = indexForCandidateName.get(candidateName);
+          if (candidateIndex == null) {
+            continue;
+          }
           // Reminder: rank = 1 indicates voter's favorite candidate.
           if (rank < rankingForCandidateIndex[candidateIndex]) {
             rankingForCandidateIndex[candidateIndex] = rank;
@@ -178,17 +194,23 @@ final class PairwiseCounting {
         for (int candidateSecondIndex = 1;
             candidateSecondIndex <= numberOfCandidatesInPairwiseCounting;
             candidateSecondIndex++) {
+          // Compare rankings, lower rank number is higher ranking.
           int comparisonOneIfGreaterMinusIfLess =
+              Integer.compare(
+                  rankingForCandidateIndex[candidateFirstIndex],
+                  rankingForCandidateIndex[candidateSecondIndex]);
+          if (comparisonOneIfGreaterMinusIfLess < 0) {
+            pairwiseCountForFirstOverSecondInPair[
+              candidateFirstIndex][candidateSecondIndex] = 
               pairwiseCountForFirstOverSecondInPair[
-              candidateFirstIndex][candidateSecondIndex].compareTo(
-              pairwiseCountForFirstOverSecondInPair[candidateSecondIndex][candidateFirstIndex]);
-          if (comparisonOneIfGreaterMinusIfLess > 0) {
-            pairwiseCountForFirstOverSecondInPair[
               candidateFirstIndex][candidateSecondIndex].add(transferValue);
-          } else if (comparisonOneIfGreaterMinusIfLess < 0) {
+          } else if (comparisonOneIfGreaterMinusIfLess > 0) {
             pairwiseCountForFirstOverSecondInPair[
+              candidateSecondIndex][candidateFirstIndex] = 
+              pairwiseCountForFirstOverSecondInPair[
               candidateSecondIndex][candidateFirstIndex].add(transferValue);
           }
+          // If equal, no pairwise preference.
         }
       }
     } // End looping over all ballots.
@@ -199,7 +221,7 @@ final class PairwiseCounting {
   // If there is a pairwise losing candidate, return its name.
   // Otherwise return null.
   public String getPairwiseLosingCandidate() {
-    String candidateNamePairwiseLosingCandidate = null ;
+    String candidateNamePairwiseLosingCandidate = null;
     boolean encounteredOnlyLosses = false;
     String candidateNameFirstInPair = null;
     String candidateNameSecondInPair = null;
@@ -208,8 +230,9 @@ final class PairwiseCounting {
     for (int candidateFirstIndex = 1;
         candidateFirstIndex <= numberOfCandidatesInPairwiseCounting;
         candidateFirstIndex++) {
+      candidateNameFirstInPair = arrayOfCandidateNamesForPairwiseCounting.get(candidateFirstIndex - 1);
       // Allow for candidate eliminations after pairwise counting was done.
-      if (!isCandidateContinuing(arrayOfCandidateNamesForPairwiseCounting[candidateFirstIndex])) {
+      if (!tabulator.isCandidateContinuing(candidateNameFirstInPair)) {
         continue;
       }
       encounteredOnlyLosses = true;
@@ -221,17 +244,15 @@ final class PairwiseCounting {
         if (candidateFirstIndex == candidateSecondIndex) {
           continue;
         }
+        candidateNameSecondInPair = arrayOfCandidateNamesForPairwiseCounting.get(candidateSecondIndex - 1);
         // Allow for candidate eliminations after pairwise counting was done.
-        if (!isCandidateContinuing(arrayOfCandidateNamesForPairwiseCounting[candidateSecondIndex])) {
+        if (!tabulator.isCandidateContinuing(candidateNameSecondInPair)) {
           continue;
         }
-        // Get candidate names based on pairwise index numbers.
-        candidateNameFirstInPair = arrayOfCandidateNamesForPairwiseCounting[candidateFirstIndex];
-        candidateNameSecondInPair = arrayOfCandidateNamesForPairwiseCounting[candidateSecondIndex];
         // If first-in-pair candidate does not lose,
         // this first-in-pair candidate cannot be pairwise losing candidate.
         if (getWinLoseTieForCandidatePair(candidateNameFirstInPair,
-            candidateNameSecondInPair) == PairwiseWinLoseTie.LOSE) {
+            candidateNameSecondInPair) != PairwiseWinLoseTie.LOSE) {
           encounteredOnlyLosses = false;
           break;
         }
@@ -248,7 +269,7 @@ final class PairwiseCounting {
 
   public void logPairwiseCounts() {
     // Determine sequence in which candidates were eliminated.
-    Map<String, Integer> candidateToRoundEliminated = getCandidateToRoundEliminated();
+    Map<String, Integer> candidateToRoundEliminated = tabulator.getCandidateToRoundEliminated();
     Map<String, Integer> eliminationSequence = candidateToRoundEliminated.entrySet()
         .stream()
         .sorted(Map.Entry.comparingByValue())
@@ -263,12 +284,18 @@ final class PairwiseCounting {
     int pairwiseRow = 1;
     // Loop through candidates in reverse order of elimination.
     // (Might need to invert sequence here)
-    for (String candidateNameFirstInPair : eliminationSequence) {
-      int candidateFirstIndex = indexForCandidateName.get(candidateNameFirstInPair);
+    for (String candidateNameFirstInPair : eliminationSequence.keySet()) {
+      Integer candidateFirstIndex = indexForCandidateName.get(candidateNameFirstInPair);
+      if (candidateFirstIndex == null) {
+        continue;
+      }
       int pairwiseColumn = 1;
       // (Might need to invert sequence here)
-      for (String candidateNameSecondInPair : eliminationSequence) {
-        int candidateSecondIndex = indexForCandidateName.get(candidateNameSecondInPair);
+      for (String candidateNameSecondInPair : eliminationSequence.keySet()) {
+        Integer candidateSecondIndex = indexForCandidateName.get(candidateNameSecondInPair);
+        if (candidateSecondIndex == null) {
+          continue;
+        }
         // Log pairwise count for first candidate over second candidate.
         Logger.info(
         "[INFO] [row] %d [column] %d [count] %s [name] %s [versus name] %s",
@@ -285,9 +312,9 @@ final class PairwiseCounting {
         pairwiseCountForFirstOverSecondInPair[candidateSecondIndex][candidateFirstIndex].toString(),
         candidateNameSecondInPair,
         candidateNameFirstInPair);
-        pairwiseColumn ++;
+        pairwiseColumn++;
       }
-      pairwiseRow ++;
+      pairwiseRow++;
     }
     Logger.info("[INFO] [End pairwise counts]");
   }
