@@ -993,4 +993,17 @@ class TabulatorTests {
     runTabulationTest("max_ranking_enforcement",
         TabulatorSession.CastVoteRecordGenericParseException.class.toString());
   }
+
+  @Test
+  @DisplayName("count overvote when single continuing")
+  void countOvervoteWhenSingleContinuing() {
+    runTabulationTest("test_set_count_overvote_when_single_continuing");
+  }
+
+  @Test
+  @DisplayName("count overvote when single for multi-winner")
+  void countOvervoteWhenSingleForMultiWinner() {
+    runTabulationTest("test_set_count_overvote_when_single_for_multi_winner");
+  }
+
 }
