@@ -56,7 +56,7 @@
   } ],
   "rules" : {
     "tiebreakMode" : "random",
-    "overvoteRule" : "countWhenSingleContinuing",
+    "overvoteRule" : "exhaustIfMultiple",
     "winnerElectionMode" : "multiWinnerAllowOnlyOneWinnerPerRound",
     "randomSeed" : "0",
     "numberOfWinners" : "3",
