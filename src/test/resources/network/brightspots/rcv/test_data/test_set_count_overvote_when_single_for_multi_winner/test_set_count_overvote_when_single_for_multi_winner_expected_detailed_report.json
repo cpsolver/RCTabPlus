@@ -74,15 +74,15 @@
       "strawberries" : "2.7500"
     },
     "tallyResults" : [ {
-      "eliminated" : "chocolate",
+      "eliminated" : "oranges",
       "transfers" : {
-        "cake" : "1"
+        "exhausted" : "2"
       }
     } ],
     "threshold" : "6"
   }, {
     "inactiveBallots" : {
-      "exhaustedChoices" : "0",
+      "exhaustedChoices" : "2",
       "overvotes" : "2.2500",
       "repeatedRankings" : "0",
       "skippedRankings" : "0"
@@ -90,16 +90,16 @@
     "round" : 4,
     "tally" : {
       "burgers" : "4",
-      "cake" : "4",
+      "cake" : "3",
       "chicken" : "2",
-      "oranges" : "2",
+      "chocolate" : "1",
       "pears" : "6.0000",
       "strawberries" : "2.7500"
     },
     "tallyResults" : [ {
-      "eliminated" : "oranges",
+      "eliminated" : "chocolate",
       "transfers" : {
-        "exhausted" : "2"
+        "cake" : "1"
       }
     } ],
     "threshold" : "6"
@@ -186,8 +186,8 @@
     "threshold" : "6"
   }, {
     "inactiveBallots" : {
-      "exhaustedChoices" : "0",
-      "finalRoundSurplus" : "3.0000",
+      "exhaustedChoices" : "3.0000",
+      "finalRoundSurplus" : "0.0000",
       "overvotes" : "2.2500",
       "repeatedRankings" : "0",
       "skippedRankings" : "0"

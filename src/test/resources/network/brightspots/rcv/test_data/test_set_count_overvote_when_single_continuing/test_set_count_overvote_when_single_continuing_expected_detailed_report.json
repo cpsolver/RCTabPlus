@@ -68,15 +68,15 @@
       "cand_E" : "2"
     },
     "tallyResults" : [ {
-      "eliminated" : "cand_E",
+      "eliminated" : "cand_D",
       "transfers" : {
-        "exhausted" : "2"
+        "exhausted" : "3"
       }
     } ],
     "threshold" : "11"
   }, {
     "inactiveBallots" : {
-      "exhaustedChoices" : "3",
+      "exhaustedChoices" : "4",
       "overvotes" : "4",
       "repeatedRankings" : "0",
       "skippedRankings" : "0"
@@ -86,15 +86,15 @@
       "cand_A" : "6",
       "cand_B" : "5",
       "cand_C" : "4",
-      "cand_D" : "3"
+      "cand_E" : "2"
     },
     "tallyResults" : [ {
-      "eliminated" : "cand_D",
+      "eliminated" : "cand_E",
       "transfers" : {
-        "exhausted" : "3"
+        "exhausted" : "2"
       }
     } ],
-    "threshold" : "10"
+    "threshold" : "9"
   }, {
     "inactiveBallots" : {
       "exhaustedChoices" : "6",

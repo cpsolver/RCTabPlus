@@ -526,7 +526,7 @@
           "SelectionPosition" : [ {
             "@type" : "CVR.SelectionPosition",
             "HasIndication" : "yes",
-            "IsAllocable" : "yes",
+            "IsAllocable" : "no",
             "NumberVotes" : 1,
             "Rank" : 1
           } ]
@@ -822,7 +822,7 @@
           "SelectionPosition" : [ {
             "@type" : "CVR.SelectionPosition",
             "HasIndication" : "yes",
-            "IsAllocable" : "yes",
+            "IsAllocable" : "no",
             "NumberVotes" : 1,
             "Rank" : 1
           } ]
@@ -5830,7 +5830,7 @@
           "SelectionPosition" : [ {
             "@type" : "CVR.SelectionPosition",
             "HasIndication" : "yes",
-            "IsAllocable" : "no",
+            "IsAllocable" : "yes",
             "NumberVotes" : 1,
             "Rank" : 1
           } ]
@@ -5840,7 +5840,7 @@
           "SelectionPosition" : [ {
             "@type" : "CVR.SelectionPosition",
             "HasIndication" : "yes",
-            "IsAllocable" : "yes",
+            "IsAllocable" : "no",
             "NumberVotes" : 1,
             "Rank" : 2
           } ]
@@ -8597,7 +8597,7 @@
     } ],
     "ElectionScopeId" : "gpu-election"
   } ],
-  "GeneratedDate" : "2026-01-26T10:11:42-08:00",
+  "GeneratedDate" : "2026-02-16T17:25:18-08:00",
   "GpUnit" : [ {
     "@id" : "gpu-election",
     "@type" : "GpUnit",

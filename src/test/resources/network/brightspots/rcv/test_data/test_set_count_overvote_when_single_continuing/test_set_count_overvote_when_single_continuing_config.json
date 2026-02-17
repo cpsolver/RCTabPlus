@@ -52,7 +52,7 @@
   } ],
   "rules" : {
     "tiebreakMode" : "useCandidateOrder",
-    "overvoteRule" : "exhaustIfMultiple",
+    "overvoteRule" : "exhaustIfMultipleContinuing",
     "winnerElectionMode" : "singleWinnerMajority",
     "randomSeed" : "2435",
     "numberOfWinners" : "1",
