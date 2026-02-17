@@ -156,18 +156,21 @@ final class PairwiseCounting {
       if (cvr.candidateRankings.numRankings() == 0) {
         continue;
       }
+      int maxRankNumberPlusOne = cvr.candidateRankings.maxRankingNumber() + 1;
       // Get the transfer value for this cast vote record, which can be
       // less than one if election has multiple winners.
       BigDecimal transferValue = cvr.getFractionalTransferValue();
       // Assume same maximum number of continuing candidates as declared at beginning.
       int[] rankingForCandidateIndex = new int[maximumCandidatesForPairwiseCounting + 1];
-      int maxRankNumberPlusOne = cvr.candidateRankings.maxRankingNumber() + 1;
       // Initialize rankings for one ballot, in case any candidates are not ranked.
       for (int candidateIndex = 1;
           candidateIndex <= numberOfCandidatesInPairwiseCounting;
           candidateIndex++) {
         rankingForCandidateIndex[candidateIndex] = maxRankNumberPlusOne;
       }
+
+      Logger.info("---Next ballot---");
+
       // Iterate over all ranks in this cast vote record.
       for (Pair<Integer, CandidatesAtRanking> rankForCandidateName : cvr.candidateRankings) {
         Integer rank = rankForCandidateName.getKey();
@@ -193,7 +196,7 @@ final class PairwiseCounting {
       for (int candidateFirstIndex = 1;
           candidateFirstIndex <= numberOfCandidatesInPairwiseCounting;
           candidateFirstIndex++) {
-        for (int candidateSecondIndex = 1;
+        for (int candidateSecondIndex = candidateFirstIndex + 1;
             candidateSecondIndex <= numberOfCandidatesInPairwiseCounting;
             candidateSecondIndex++) {
           // Compare rankings, lower rank number is higher ranking.
@@ -206,11 +209,17 @@ final class PairwiseCounting {
               candidateFirstIndex][candidateSecondIndex] = 
               pairwiseCountForFirstOverSecondInPair[
               candidateFirstIndex][candidateSecondIndex].add(transferValue);
+
+              Logger.info("%d over %d", candidateFirstIndex, candidateSecondIndex);
+
           } else if (comparisonOneIfGreaterMinusIfLess > 0) {
             pairwiseCountForFirstOverSecondInPair[
               candidateSecondIndex][candidateFirstIndex] = 
               pairwiseCountForFirstOverSecondInPair[
               candidateSecondIndex][candidateFirstIndex].add(transferValue);
+
+              Logger.info("%d over %d", candidateSecondIndex, candidateFirstIndex);
+
           }
           // If equal, no pairwise preference.
         }
