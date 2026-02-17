@@ -138,15 +138,16 @@ final class PairwiseCounting {
     if ((haveCurrentPairwiseCounts) && (config.getNumberOfWinners() < 2)) {
       return false;
     }
-    // Pairwise counting is not done if there are too many continuing candidates,
-    // or if there are only two continuing candidates.
-    int numberOfContinuingCandidates = tabulator.countContinuingCandidates();
-    if ((numberOfContinuingCandidates < 3)
-        || (numberOfContinuingCandidates > maximumCandidatesForPairwiseCounting)) {
+    // Pairwise counting is not done if there are too many continuing candidates.
+    if (tabulator.countContinuingCandidates() > maximumCandidatesForPairwiseCounting) {
       return false;
     }
     generateListOfCandidateNamesForPairwiseCounting();
     int numberOfCandidatesInPairwiseCounting = arrayOfCandidateNamesForPairwiseCounting.size();
+    // Also not done if only one or two candidate names found.
+    if (numberOfCandidatesInPairwiseCounting < 3) {
+      return false;
+    }
     initializePairwiseCounts();
     int currentRound = tabulator.getCurrentRoundNumber();
     Logger.info("Doing pairwise counting in round: %d", currentRound);
@@ -210,7 +211,7 @@ final class PairwiseCounting {
               pairwiseCountForFirstOverSecondInPair[
               candidateFirstIndex][candidateSecondIndex].add(transferValue);
 
-              Logger.info("%d over %d", candidateFirstIndex, candidateSecondIndex);
+              Logger.info("%d over %d at weight %s", candidateFirstIndex, candidateSecondIndex, transferValue);
 
           } else if (comparisonOneIfGreaterMinusIfLess > 0) {
             pairwiseCountForFirstOverSecondInPair[
@@ -218,21 +219,26 @@ final class PairwiseCounting {
               pairwiseCountForFirstOverSecondInPair[
               candidateSecondIndex][candidateFirstIndex].add(transferValue);
 
-              Logger.info("%d over %d", candidateSecondIndex, candidateFirstIndex);
+              Logger.info("%d over %d at weight %s", candidateSecondIndex, candidateFirstIndex, transferValue);
 
           }
           // If equal, no pairwise preference.
         }
       }
     } // End looping over all ballots.
+    logPairwiseCounts();
     haveCurrentPairwiseCounts = true;
-    return true;
+    return haveCurrentPairwiseCounts;
   }
 
   // If there is a pairwise losing candidate, return its name.
   // Otherwise return null.
   public String getPairwiseLosingCandidate() {
+    boolean pairwiseCountingDone = doPairwiseCounting();
     String candidateNamePairwiseLosingCandidate = null;
+    if (!pairwiseCountingDone) {
+      return candidateNamePairwiseLosingCandidate;
+    }
     boolean encounteredOnlyLosses = false;
     String candidateNameFirstInPair = null;
     String candidateNameSecondInPair = null;
@@ -273,11 +279,12 @@ final class PairwiseCounting {
       // If candidate lost every pairwise contest, is pairwise losing candidate.
       // There cannot be a second pairwise losing candidate in the same counting round.
       if (encounteredOnlyLosses) {
-        return candidateNameFirstInPair;
+        candidateNamePairwiseLosingCandidate = candidateNameFirstInPair;
+        return candidateNamePairwiseLosingCandidate;
       }
     } // Repeat outer loop through candidates.
     // If reached here, there is no pairwise losing candidate.
-    return null;
+    return candidateNamePairwiseLosingCandidate;
   }
 
   public void logPairwiseCounts() {
@@ -298,10 +305,16 @@ final class PairwiseCounting {
     // Loop through candidates in reverse order of elimination.
     // (Might need to invert sequence here)
     for (String candidateNameFirstInPair : eliminationSequence.keySet()) {
+
+      Logger.info("candidate name %s", candidateNameFirstInPair);
+
       Integer candidateFirstIndex = indexForCandidateName.get(candidateNameFirstInPair);
       if (candidateFirstIndex == null) {
         continue;
       }
+
+      Logger.info("candidate number %d", candidateFirstIndex);
+
       int pairwiseColumn = 1;
       // (Might need to invert sequence here)
       for (String candidateNameSecondInPair : eliminationSequence.keySet()) {
