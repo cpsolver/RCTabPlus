@@ -30,6 +30,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import javafx.util.Pair;
 import network.brightspots.rcv.CandidatesAtRanking;
 
@@ -226,8 +227,10 @@ final class PairwiseCounting {
         }
       }
     } // End looping over all ballots.
-    logPairwiseCounts();
     haveCurrentPairwiseCounts = true;
+
+    boolean isPairwiseCountsLogged = logPairwiseCounts();
+
     return haveCurrentPairwiseCounts;
   }
 
@@ -287,63 +290,79 @@ final class PairwiseCounting {
     return candidateNamePairwiseLosingCandidate;
   }
 
-  public void logPairwiseCounts() {
-    // Determine sequence in which candidates were eliminated.
-    Map<String, Integer> candidateToRoundEliminated = tabulator.getCandidateToRoundEliminated();
-    Map<String, Integer> eliminationSequence = candidateToRoundEliminated.entrySet()
-        .stream()
-        .sorted(Map.Entry.comparingByValue())
-        .collect(Collectors.toMap(
-            Map.Entry::getKey,
-            Map.Entry::getValue,
-            (e1, e2) -> e1,
-            LinkedHashMap::new
-        ));
+  public boolean logPairwiseCounts() {
+    if (haveCurrentPairwiseCounts == false) {
+      Logger.info("Log of pairwise counts requested but counts not yet tabulated");
+      return false;
+    }
+
+    List<Integer> sequenceOfCharacterIndexNumbers = IntStream.range(1,arrayOfCandidateNamesForPairwiseCounting.size())
+        .boxed().toList();
+
+    // Map<String, Integer> pairwiseLoggingSequence = new HashMap();
+    // Map<String, Integer> candidateToRoundEliminated = tabulator.getCandidateToRoundEliminated();
+    // if (candidateToRoundEliminated.entrySet().size() < 1) {
+    //   Logger.info("Pairwise counts not logged in elimination sequence because sequence not yet known");
+
+    //   Logger.info("number of candidates now is %d", arrayOfCandidateNamesForPairwiseCounting.size());
+
+    //   for (Integer candidateIndex = 1; candidateIndex >= arrayOfCandidateNamesForPairwiseCounting.size(); candidateIndex++) {
+    //     String candidateName = arrayOfCandidateNamesForPairwiseCounting.get(candidateIndex - 1);
+
+    //     pairwiseLoggingSequence.put(candidateName, candidateIndex);
+
+    //     Logger.info("Candidate name %s at candidate index %d", candidateName, candidateIndex);
+
+    //   }
+    // } else {
+
+    //   Logger.info("number of candidates in elimination seququence is %d", candidateToRoundEliminated.entrySet().size());
+
+    //   // Determine sequence in which candidates were eliminated.
+    //   pairwiseLoggingSequence = candidateToRoundEliminated.entrySet()
+    //       .stream()
+    //       .sorted(Map.Entry.comparingByValue())
+    //       .collect(Collectors.toMap(
+    //           Map.Entry::getKey,
+    //           Map.Entry::getValue,
+    //           (e1, e2) -> e1,
+    //           LinkedHashMap::new
+    //       ));
+    // }
+
+
     Logger.info("[INFO] [Begin pairwise counts]");
-    // Initialize row and column numbers which are useful for table visualization.
+    // Use row and column numbers which are useful for table visualization.
     int pairwiseRow = 1;
-    // Loop through candidates in reverse order of elimination.
-    // (Might need to invert sequence here)
-    for (String candidateNameFirstInPair : eliminationSequence.keySet()) {
-
-      Logger.info("candidate name %s", candidateNameFirstInPair);
-
-      Integer candidateFirstIndex = indexForCandidateName.get(candidateNameFirstInPair);
-      if (candidateFirstIndex == null) {
-        continue;
-      }
-
-      Logger.info("candidate number %d", candidateFirstIndex);
-
+    for (Integer candidateFirstIndex : sequenceOfCharacterIndexNumbers) {
+      String candidateNameFirstInPair = 
+          arrayOfCandidateNamesForPairwiseCounting.get(candidateFirstIndex - 1);
+      Logger.info(
+          "[INFO] [row] %d",
+              pairwiseRow);
       int pairwiseColumn = 1;
-      // (Might need to invert sequence here)
-      for (String candidateNameSecondInPair : eliminationSequence.keySet()) {
-        Integer candidateSecondIndex = indexForCandidateName.get(candidateNameSecondInPair);
-        if (candidateSecondIndex == null) {
-          continue;
+      for (Integer candidateSecondIndex : sequenceOfCharacterIndexNumbers) {
+        String candidateNameSecondInPair = 
+          arrayOfCandidateNamesForPairwiseCounting.get(candidateSecondIndex - 1);
+        if (candidateFirstIndex == candidateSecondIndex) {
+          Logger.info(
+              "[INFO] [column] %d [self] %s",
+              pairwiseColumn,
+              candidateNameFirstInPair);
+        } else {
+          Logger.info(
+              "[INFO] [column] %d [count] %s [name] %s [versus name] %s",
+              pairwiseColumn,
+              pairwiseCountForFirstOverSecondInPair[candidateFirstIndex][candidateSecondIndex]
+                  .toString(),
+              candidateNameFirstInPair,
+              candidateNameSecondInPair);
         }
-        // Log pairwise count for first candidate over second candidate.
-        Logger.info(
-            "[INFO] [row] %d [column] %d [count] %s [name] %s [versus name] %s",
-            pairwiseRow,
-            pairwiseColumn,
-            pairwiseCountForFirstOverSecondInPair[candidateFirstIndex][candidateSecondIndex]
-                .toString(),
-            candidateNameFirstInPair,
-            candidateNameSecondInPair);
-        // Log pairwise count for second candidate over first candidate.
-        Logger.info(
-            "[INFO] [row] %d [column] %d [count] %s [name] %s [versus name] %s",
-            pairwiseColumn,
-            pairwiseRow,
-            pairwiseCountForFirstOverSecondInPair[candidateSecondIndex][candidateFirstIndex]
-                .toString(),
-            candidateNameSecondInPair,
-            candidateNameFirstInPair);
         pairwiseColumn++;
       }
       pairwiseRow++;
     }
     Logger.info("[INFO] [End pairwise counts]");
+    return true;
   }
 }
