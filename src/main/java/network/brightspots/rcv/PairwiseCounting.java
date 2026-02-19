@@ -228,9 +228,6 @@ final class PairwiseCounting {
       }
     } // End looping over all ballots.
     haveCurrentPairwiseCounts = true;
-
-    boolean isPairwiseCountsLogged = logPairwiseCounts();
-
     return haveCurrentPairwiseCounts;
   }
 
@@ -298,27 +295,29 @@ final class PairwiseCounting {
     // If known, use sequence in which candidates were eliminated.
     List<Integer> sequenceOfCharacterIndexNumbers = new ArrayList();
     Map<String, Integer> candidateToRoundEliminated = tabulator.getCandidateToRoundEliminated();
-    if (candidateToRoundEliminated.entrySet().size() < 1) {
+//    if (candidateToRoundEliminated.entrySet().size() < 1) {
       Logger.info("Using default sequence because elimination sequence not yet known");
       sequenceOfCharacterIndexNumbers = IntStream.iterate(
           arrayOfCandidateNamesForPairwiseCounting.size(), i -> i >= 1, i -> i - 1)
           .boxed().toList();
-    }
-
-    // candidateToRoundEliminated.entrySet()
-    //     .stream()
-    //     .sorted(Map.Entry.comparingByValue())
-    //     .collect(Collectors.toMap(
-    //         Map.Entry::getKey,
-    //         Map.Entry::getValue,
-    //         (e1, e2) -> e1,
-    //         LinkedHashMap::new
-    //     ));
+//    }
 
     candidateToRoundEliminated.forEach((candidate, round) ->
-        Logger.info("Candidate: " + candidate + " -> eliminated in round: " + round));
+        Logger.info("Candidate: " + candidate + " eliminated in round " + round));
 
-    // sequenceOfCharacterIndexNumbers =
+    // candidateToRoundEliminated.forEach(String candidateName, Integer roundNumber) {
+    //   sequenceOfCharacterIndexNumbers.add(indexForCandidateName.get(candidateName));
+    //   Logger.info("candidate %s", candidateName);
+    // }
+
+    // sequenceOfCharacterIndexNumbers = candidateToRoundEliminated.entrySet()
+    //     .stream()
+    //     .sorted(Map.Entry.comparingByValue())
+    //     .collect(Collectors.toList(
+    //         Map.Entry::getKey,
+    //         e1,
+    //         LinkedList::new
+    //     ));
 
 
     Logger.info("Begin pairwise counts");

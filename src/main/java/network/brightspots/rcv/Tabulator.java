@@ -284,7 +284,9 @@ final class Tabulator {
 
         // 4. Otherwise, possibly eliminate a pairwise losing candidate.
         // A counting round cannot have more than one pairwise losing candidate.
+
         boolean configUsePairwiseCounting = true;
+
         if (eliminated.isEmpty() && configUsePairwiseCounting) {
           String candidateNamePairwiseLosingCandidate = 
               pairwiseCounting.getPairwiseLosingCandidate();
@@ -319,6 +321,12 @@ final class Tabulator {
       if (config.getNumberOfWinners() > 1) {
         updateWinnerTallies();
       }
+    }
+
+    boolean configUsePairwiseCounting = true;
+
+    if (configUsePairwiseCounting) {
+      boolean isPairwiseCountsLogged = pairwiseCounting.logPairwiseCounts();
     }
     return winnerToRound.keySet();
   }
