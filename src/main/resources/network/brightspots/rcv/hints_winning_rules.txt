@@ -58,4 +58,4 @@ Threshold Calculation Method: The threshold of election is the number of votes a
 
 Decimal Places for Vote Arithmetic (Multi-Winner Only): Sets how many decimal places after the decimal point are used in surplus transfers and in calculating the threshold.
 
-Eliminate Pairwise Losing Candidates: Starting when the number of continuing candidates does not exceed the specified continuing-candidate count, eliminate pairwise losing candidates when they occur.  A pairwise losing candidate is a candidate who loses every one-on-one contest against every other continuing candidate. When there are only two continuing candidates, pairwise counting is not done because it would not change who wins.
+Eliminate Pairwise Losing Candidates: Starting after other elimination methods and when there are fewer than seven continuing candidates, eliminate pairwise losing candidates when they occur.  A pairwise losing candidate is a candidate who loses every one-on-one contest against every other continuing candidate. Pairwise counting is not done when there are only two continuing candidates.

@@ -1107,7 +1107,7 @@ public class GuiConfigController implements Initializable {
     textFieldDecimalPlacesForVoteArithmetic.setText(
         String.valueOf(ContestConfig.SUGGESTED_DECIMAL_PLACES_FOR_VOTE_ARITHMETIC));
     checkBoxMaxRankingsAllowedMax.setSelected(ContestConfig.SUGGESTED_MAX_RANKINGS_ALLOWED_MAXIMUM);
-    checkBoxEliminatePairwiseLosing.setSelected(ContestConfig.ELIMINATE_PAIRWISE_LOSING_CANDIDATES);
+    checkBoxEliminatePairwiseLosing.setSelected(ContestConfig.SUGGESTED_ELIMINATE_PAIRWISE_LOSING_CANDIDATES);
   }
 
   private void setDefaultValues() {
