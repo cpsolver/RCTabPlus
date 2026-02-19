@@ -66,6 +66,7 @@ final class Tabulator {
   static final String OVERVOTE_RULE_ALWAYS_SKIP_TEXT = "Always skip to next rank";
   static final String OVERVOTE_RULE_EXHAUST_IMMEDIATELY_TEXT = "Exhaust immediately";
   static final String OVERVOTE_RULE_EXHAUST_IF_MULTIPLE_TEXT = "Exhaust if multiple continuing";
+  static final String ELIMINATE_PAIRWISE_LOSING_CANDIDATES = "Eliminate pairwise losing candidates";
   // When the CVR contains an overvote we "normalize" it to use this string
   static final String EXPLICIT_OVERVOTE_LABEL = "overvote";
   // Similarly, we normalize undeclared write-ins to use this string

@@ -56,6 +56,7 @@ class ContestConfig {
   static final boolean SUGGESTED_BATCH_ELIMINATION = false;
   static final boolean SUGGESTED_CUTOFF_ELIMINATION = false;
   static final boolean SUGGESTED_CONTINUE_UNTIL_TWO_CANDIDATES_REMAIN = false;
+  static final boolean ELIMINATE_PAIRWISE_LOSING_CANDIDATES = false;
   static final boolean SUGGESTED_EXHAUST_ON_DUPLICATE_CANDIDATES = false;
   static final boolean SUGGESTED_FIRST_ROUND_DETERMINES_THRESHOLD = false;
   static final boolean SUGGESTED_TREAT_BLANK_AS_UNDECLARED_WRITE_IN = false;
@@ -1161,6 +1162,10 @@ class ContestConfig {
     return isNullOrBlank(getStopTabulationEarlyAfterRoundRaw())
         ? Integer.MAX_VALUE
         : Integer.parseInt(getStopTabulationEarlyAfterRoundRaw());
+  }
+
+  boolean isEliminatePairwiseLosingEnabled() {
+    return rawConfig.rules.eliminatePairwiseLosing;
   }
 
   int getNumDeclaredCandidates() {

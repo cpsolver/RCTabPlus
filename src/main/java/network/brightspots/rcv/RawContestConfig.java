@@ -422,6 +422,7 @@ public class RawContestConfig {
     public boolean continueUntilTwoCandidatesRemain;
     public String stopTabulationEarlyAfterRound;
     public boolean exhaustOnDuplicateCandidate;
+    public boolean eliminatePairwiseLosing;
     public String rulesDescription;
 
     // These are deprecated (moved to individual CVRs), but we need to leave them in place here for

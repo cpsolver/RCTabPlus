@@ -279,6 +279,8 @@ public class GuiConfigController implements Initializable {
   @FXML
   private CheckBox checkBoxExhaustOnDuplicateCandidate;
   @FXML
+  private CheckBox checkBoxEliminatePairwiseLosing;
+  @FXML
   private MenuBar menuBar;
   @FXML
   private TabPane tabPane;
@@ -1069,6 +1071,8 @@ public class GuiConfigController implements Initializable {
     checkBoxContinueUntilTwoCandidatesRemain.setDisable(true);
     checkBoxFirstRoundDeterminesThreshold.setSelected(false);
     checkBoxFirstRoundDeterminesThreshold.setDisable(true);
+    checkBoxEliminatePairwiseLosing.setSelected(true);
+    checkBoxEliminatePairwiseLosing.setDisable(true);
     choiceTiebreakMode.setValue(null);
     choiceTiebreakMode.setDisable(true);
     clearAndDisableTiebreakFields();
@@ -1103,6 +1107,7 @@ public class GuiConfigController implements Initializable {
     textFieldDecimalPlacesForVoteArithmetic.setText(
         String.valueOf(ContestConfig.SUGGESTED_DECIMAL_PLACES_FOR_VOTE_ARITHMETIC));
     checkBoxMaxRankingsAllowedMax.setSelected(ContestConfig.SUGGESTED_MAX_RANKINGS_ALLOWED_MAXIMUM);
+    checkBoxEliminatePairwiseLosing.setSelected(ContestConfig.ELIMINATE_PAIRWISE_LOSING_CANDIDATES);
   }
 
   private void setDefaultValues() {
@@ -1712,6 +1717,7 @@ public class GuiConfigController implements Initializable {
     checkBoxFirstRoundDeterminesThreshold.setSelected(rules.doesFirstRoundDetermineThreshold);
     textFieldStopTabulationEarlyAfterRound.setText(rules.stopTabulationEarlyAfterRound);
     checkBoxExhaustOnDuplicateCandidate.setSelected(rules.exhaustOnDuplicateCandidate);
+    checkBoxEliminatePairwiseLosing.setSelected(rules.eliminatePairwiseLosing);
   }
 
   private void setThresholdCalculationMethodRadioButton(boolean nonIntegerWinningThreshold,
@@ -1808,6 +1814,7 @@ public class GuiConfigController implements Initializable {
         getTextOrEmptyString(textFieldStopTabulationEarlyAfterRound);
     rules.exhaustOnDuplicateCandidate = checkBoxExhaustOnDuplicateCandidate.isSelected();
     rules.rulesDescription = getTextOrEmptyString(textFieldRulesDescription);
+    rules.eliminatePairwiseLosing = checkBoxEliminatePairwiseLosing.isSelected();
     config.rules = rules;
 
     return config;
