@@ -310,15 +310,12 @@ final class PairwiseCounting {
     //   Logger.info("candidate %s", candidateName);
     // }
 
-    // sequenceOfCharacterIndexNumbers = candidateToRoundEliminated.entrySet()
-    //     .stream()
-    //     .sorted(Map.Entry.comparingByValue())
-    //     .collect(Collectors.toList(
-    //         Map.Entry::getKey,
-    //         e1,
-    //         LinkedList::new
-    //     ));
+    sequenceOfCharacterIndexNumbers = candidateToRoundEliminated.entrySet()
+        .stream()
+        .map(Map.Entry::getValue)
+        .collect(Collectors.toList()); 
 
+    Logger.info("index numbers: %s", sequenceOfCharacterIndexNumbers.toString());
 
     Logger.info("Begin pairwise counts");
     // Use row and column numbers which are useful for table visualization.
