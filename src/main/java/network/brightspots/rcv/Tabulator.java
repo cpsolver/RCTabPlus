@@ -277,12 +277,6 @@ final class Tabulator {
           eliminated = doBatchElimination(currentRoundTallyToCandidates);
         }
 
-        // Specify maximumNumberOfCandidatesForPairwiseCounting.
-        // Later this number will be assigned by user.
-        // Use a value of zero to turn off this option.
-        // A value of 1 or 2 is ignored because that cannot change who wins.
-        int maximumNumberOfCandidatesForPairwiseCounting = 5;
-
         // 4. Otherwise, possibly eliminate a pairwise losing candidate.
         // A counting round cannot have more than one pairwise losing candidate.
 
