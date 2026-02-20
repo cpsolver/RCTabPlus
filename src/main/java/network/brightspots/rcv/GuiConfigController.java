@@ -1071,7 +1071,7 @@ public class GuiConfigController implements Initializable {
     checkBoxContinueUntilTwoCandidatesRemain.setDisable(true);
     checkBoxFirstRoundDeterminesThreshold.setSelected(false);
     checkBoxFirstRoundDeterminesThreshold.setDisable(true);
-    checkBoxEliminatePairwiseLosing.setSelected(true);
+    checkBoxEliminatePairwiseLosing.setSelected(false);
     checkBoxEliminatePairwiseLosing.setDisable(true);
     choiceTiebreakMode.setValue(null);
     choiceTiebreakMode.setDisable(true);
@@ -1107,7 +1107,7 @@ public class GuiConfigController implements Initializable {
     textFieldDecimalPlacesForVoteArithmetic.setText(
         String.valueOf(ContestConfig.SUGGESTED_DECIMAL_PLACES_FOR_VOTE_ARITHMETIC));
     checkBoxMaxRankingsAllowedMax.setSelected(ContestConfig.SUGGESTED_MAX_RANKINGS_ALLOWED_MAXIMUM);
-    checkBoxEliminatePairwiseLosing.setSelected(ContestConfig.SUGGESTED_ELIMINATE_PAIRWISE_LOSING_CANDIDATES);
+    checkBoxEliminatePairwiseLosing.setSelected(ContestConfig.SUGGESTED_ELIMINATE_PAIRWISE_LOSING);
   }
 
   private void setDefaultValues() {
@@ -1539,6 +1539,7 @@ public class GuiConfigController implements Initializable {
           checkBoxContinueUntilTwoCandidatesRemain.setDisable(false);
           checkBoxFirstRoundDeterminesThreshold.setDisable(false);
           textFieldNumberOfWinners.setText("1");
+          checkBoxEliminatePairwiseLosing.setDisable(true);
         }
         case MULTI_SEAT_ALLOW_ONLY_ONE_WINNER_PER_ROUND,
             MULTI_SEAT_ALLOW_MULTIPLE_WINNERS_PER_ROUND -> {
@@ -1547,6 +1548,7 @@ public class GuiConfigController implements Initializable {
           radioThresholdHareQuota.setDisable(false);
           textFieldDecimalPlacesForVoteArithmetic.setDisable(false);
           textFieldNumberOfWinners.setDisable(false);
+          checkBoxEliminatePairwiseLosing.setDisable(true);
         }
         case MULTI_SEAT_SEQUENTIAL_WINNER_TAKES_ALL -> {
           textFieldNumberOfWinners.setDisable(false);
