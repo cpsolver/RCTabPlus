@@ -50,9 +50,9 @@ final class PairwiseCounting {
   // Number of candidates actually included in pairwise counts.
   private int numberOfCandidatesPairwiseCounting;
   // Number of candidates for pairwise counting cannot exceed this limit.
-  private final int maximumCandidatesPairwiseCounting = 10;
-  // List of names of continuing candidates, but must not exceed above limit.
-  private ArrayList<String> arrayOfCandidateNamesForPairwiseCounting = new ArrayList<>(10);
+  private int maximumCandidatesPairwiseCounting = 10;
+  // List of names of continuing candidates.
+  private ArrayList<String> arrayOfCandidateNamesForPairwiseCounting = new ArrayList<>();
   // Associate each continuing candidate name with a position in the pairwise counting array.
   private HashMap<String, Integer> indexForCandidateName = new HashMap<>();
   private BigDecimal[][] pairwiseCountForFirstOverSecondInPair;
