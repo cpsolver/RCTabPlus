@@ -1006,4 +1006,10 @@ class TabulatorTests {
     runTabulationTest("test_set_count_overvote_when_single_for_multi_winner");
   }
 
+  @Test
+  @DisplayName("eliminate pairwise losing candidates")
+  void  eliminatePairwiseLosingCandidates() {
+    runTabulationTest("test_set_eliminate_pairwise_losing_candidates");
+  }
+
 }
