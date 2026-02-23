@@ -34,6 +34,7 @@ import java.util.stream.IntStream;
 import javafx.util.Pair;
 import network.brightspots.rcv.CandidatesAtRanking;
 
+
 final class PairwiseCounting {
 
   public enum PairwiseWinLoseTie {
@@ -220,7 +221,11 @@ final class PairwiseCounting {
               pairwiseCountForFirstOverSecondInPair[
               candidateFirstIndex][candidateSecondIndex].add(transferValue);
 
-              Logger.info("%d over %d at weight %s", candidateFirstIndex, candidateSecondIndex, transferValue);
+              Logger.info(
+                  "%d over %d at weight %s",
+                  candidateFirstIndex,
+                  candidateSecondIndex,
+                  transferValue);
 
           } else if (comparisonOneIfGreaterMinusIfLess > 0) {
             pairwiseCountForFirstOverSecondInPair[
@@ -228,7 +233,11 @@ final class PairwiseCounting {
               pairwiseCountForFirstOverSecondInPair[
               candidateSecondIndex][candidateFirstIndex].add(transferValue);
 
-              Logger.info("%d over %d at weight %s", candidateSecondIndex, candidateFirstIndex, transferValue);
+              Logger.info(
+                  "%d over %d at weight %s",
+                  candidateSecondIndex,
+                  candidateFirstIndex,
+                  transferValue);
 
           }
           // If equal, no pairwise preference.
@@ -308,7 +317,8 @@ final class PairwiseCounting {
     }
     // If known, use sequence in which candidates were eliminated.
     List<Integer> sequenceOfCharacterIndexNumbers = new ArrayList();
-    Map<String, Integer> candidateToRoundEliminated = tabulator.getCandidateToRoundEliminated();
+    Map<String, Integer> candidateToRoundEliminated = 
+        tabulator.getCandidateToRoundEliminated();
     if (candidateToRoundEliminated.entrySet().size() > 1) {
       sequenceOfCharacterIndexNumbers = candidateToRoundEliminated.entrySet()
           .stream()
