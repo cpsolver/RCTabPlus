@@ -260,10 +260,6 @@ final class Tabulator {
         // a) we haven't found all the winners yet, or
         // b) we've found our winner, but we're continuing until we have only two candidates
         // c) not all remaining candidates meet the bottoms-up threshold
-
-        // Count the number of continuing candidates.
-        int countOfContinuingCandidates = countContinuingCandidates();
-
         List<TallyDecision> eliminated;
         // Five mutually exclusive ways to eliminate candidates.
         // 1. Some races contain undeclared write-ins that should be dropped immediately.
@@ -276,13 +272,9 @@ final class Tabulator {
         if (eliminated.isEmpty()) {
           eliminated = doBatchElimination(currentRoundTallyToCandidates);
         }
-
         // 4. Otherwise, possibly eliminate a pairwise losing candidate.
         // A counting round cannot have more than one pairwise losing candidate.
-
-        boolean configUsePairwiseCounting = true;
-
-        if (eliminated.isEmpty() && configUsePairwiseCounting) {
+        if (eliminated.isEmpty() && config.isEliminatePairwiseLosingEnabled()) {
           String candidateNamePairwiseLosingCandidate = 
               pairwiseCounting.getPairwiseLosingCandidate();
           if (candidateNamePairwiseLosingCandidate != null) {

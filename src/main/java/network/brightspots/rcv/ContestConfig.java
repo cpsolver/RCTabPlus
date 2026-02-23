@@ -875,6 +875,13 @@ class ContestConfig {
       Logger.severe(
           "nonIntegerWinningThreshold and hareQuota can't both be true at the same time!");
     }
+
+    if (isMultiSeatBottomsUpWithThresholdEnabled() && isEliminatePairwiseLosingEnabled()) {
+      validationErrors.add(
+              ValidationError.RULES_BOTTOMS_UP_THRESHOLD_ELIMINATE_PAIRWISE_DISAGREEMENT);
+      Logger.severe(
+              "eliminatePairwiseLosing can't be true when winnerElectionMode is \"%s\"!", winnerMode);
+    }
   }
 
   private String getNumberOfWinnersRaw() {
@@ -1358,6 +1365,7 @@ class ContestConfig {
     RULES_NON_INTEGER_WINNING_THRESHOLD_WINNER_ELECTION_MODE_DISAGREEMENT,
     RULES_HARE_QUOTA_WINNER_ELECTION_MODE_DISAGREEMENT,
     RULES_NON_INTEGER_WINNING_THRESHOLD_HARE_QUOTA_DISAGREEMENT
+    RULES_BOTTOMS_UP_THRESHOLD_ELIMINATE_PAIRWISE_DISAGREEMENT,
   }
 
   enum Provider {
