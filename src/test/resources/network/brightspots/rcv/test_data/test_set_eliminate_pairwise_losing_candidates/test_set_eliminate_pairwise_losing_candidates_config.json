@@ -1,9 +1,9 @@
 {
   "tabulatorVersion" : "2.0.1",
   "outputSettings" : {
-    "contestName" : "Count-overvote-when-single-continuing",
-    "outputDirectory" : "/home/aw/RCTab/rcv/src/test/resources/network/brightspots/rcv/test_data/test_set_count_overvote_when_single_continuing/output",
-    "contestDate" : "2026-01-26",
+    "contestName" : "test-set=eliminate-pairwise-losing-candidates",
+    "outputDirectory" : "/home/aw/RCTab/rcv/src/test/resources/network/brightspots/rcv/test_data/test_set_eliminate_pairwise_losing_candidates/output",
+    "contestDate" : "2026-02-24",
     "contestJurisdiction" : "Portlandia",
     "contestOffice" : "Mayor",
     "tabulateByBatch" : false,
@@ -11,7 +11,7 @@
     "generateCdfJson" : true
   },
   "cvrFileSources" : [ {
-    "filePath" : "test_set_count_overvote_when_single_continuing_ballots.csv",
+    "filePath" : "test_set_eliminate_pairwise_losing_candidates_ballots.csv",
     "contestId" : "",
     "firstVoteColumnIndex" : "4",
     "firstVoteRowIndex" : "2",
