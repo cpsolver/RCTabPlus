@@ -285,6 +285,9 @@ final class Tabulator {
                     false,
                     currentRound)
             );
+            Logger.info(
+                "Candidate \"%s\" was eliminated in round %d as a pairwise losing candidate.",
+                candidateNamePairwiseLosingCandidate, currentRound);
           }
         }
         // 5. If we haven't yet eliminated at least one candidate,
@@ -310,11 +313,13 @@ final class Tabulator {
       }
     }
 
-    boolean configUsePairwiseCounting = true;
-
-    if (configUsePairwiseCounting) {
+    if (config.isEliminatePairwiseLosingEnabled()) {
       boolean isPairwiseCountsLogged = pairwiseCounting.logPairwiseCounts();
+      if (!isPairwiseCountsLogged) {
+        Logger.info("Pairwise counting requested but pairwise counts not logged");
+      }
     }
+
     return winnerToRound.keySet();
   }
 

@@ -880,7 +880,7 @@ class ContestConfig {
       validationErrors.add(
               ValidationError.RULES_BOTTOMS_UP_THRESHOLD_ELIMINATE_PAIRWISE_DISAGREEMENT);
       Logger.severe(
-              "eliminatePairwiseLosing can't be true when winnerElectionMode is \"%s\"!", winnerMode);
+          "eliminatePairwiseLosing can't be true when winnerElectionMode is \"%s\"!", winnerMode);
     }
   }
 
