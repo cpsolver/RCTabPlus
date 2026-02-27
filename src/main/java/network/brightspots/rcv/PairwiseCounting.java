@@ -33,6 +33,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import javafx.util.Pair;
 import network.brightspots.rcv.CandidatesAtRanking;
+import network.brightspots.rcv.OutputWriter;
 
 
 final class PairwiseCounting {
@@ -59,6 +60,8 @@ final class PairwiseCounting {
   private HashMap<String, Integer> indexForCandidateName = new HashMap<>();
   private BigDecimal[][] pairwiseCountForFirstOverSecondInPair;
   private boolean haveCurrentPairwiseCounts = false;
+  // Make the pairwise counts available to the report writer
+  public Map<String, Map<String, BigDecimal>> pairwiseCountsAsMap = new LinkedHashMap<>();
 
   PairwiseCounting(
         Tabulator tabulator, List<CastVoteRecord> castVoteRecords, ContestConfig config) {
@@ -324,37 +327,58 @@ final class PairwiseCounting {
           arrayOfCandidateNamesForPairwiseCounting.size(), i -> i >= 1, i -> i - 1)
           .boxed().toList();
     }
-    Logger.info("Begin pairwise counts");
     int pairwiseRow = 1;
     for (Integer candidateFirstIndex : tableSequenceCandidateIndexNumbers) {
-      String candidateNameFirstInPair = 
+      String rowCandidateName = 
           arrayOfCandidateNamesForPairwiseCounting.get(candidateFirstIndex - 1);
-      Logger.info(
-          "row %d",
-              pairwiseRow);
+      Map<String, BigDecimal> rowPairwiseData = new LinkedHashMap<>();
       int pairwiseColumn = 1;
       for (Integer candidateSecondIndex : tableSequenceCandidateIndexNumbers) {
-        String candidateNameSecondInPair = 
+        String columnCandidateName = 
             arrayOfCandidateNamesForPairwiseCounting.get(candidateSecondIndex - 1);
-        if (candidateFirstIndex == candidateSecondIndex) {
-          Logger.info(
-              "column %d self %s",
-              pairwiseColumn,
-              candidateNameFirstInPair);
-        } else {
-          Logger.info(
-              "column %d count %s for %s over %s",
-              pairwiseColumn,
-              pairwiseCountForFirstOverSecondInPair[candidateFirstIndex][candidateSecondIndex]
-                  .toString(),
-              candidateNameFirstInPair,
-              candidateNameSecondInPair);
-        }
-        pairwiseColumn++;
+        rowPairwiseData.put(columnCandidateName, pairwiseCountForFirstOverSecondInPair[candidateFirstIndex][candidateSecondIndex]);
       }
-      pairwiseRow++;
+      pairwiseCountsAsMap.put(rowCandidateName, rowPairwiseData);
     }
-    Logger.info("End pairwise counts");
+    // Write the pairwise CSV report
+    List<String> pairwiseCandidateNameOrder = new ArrayList<>();
+    for (Integer candidateIndex : tableSequenceCandidateIndexNumbers) {
+      pairwiseCandidateNameOrder.add(arrayOfCandidateNamesForPairwiseCounting.get(candidateIndex - 1));
+    }
+    generatePairwiseCsvReport(pairwiseCandidateNameOrder,pairwiseCountsAsMap);
+
+    // Logger.info("Begin pairwise counts");
+    // int pairwiseRow = 1;
+    // for (Integer candidateFirstIndex : tableSequenceCandidateIndexNumbers) {
+    //   String candidateNameFirstInPair = 
+    //       arrayOfCandidateNamesForPairwiseCounting.get(candidateFirstIndex - 1);
+    //   Logger.info(
+    //       "row %d",
+    //           pairwiseRow);
+    //   int pairwiseColumn = 1;
+    //   for (Integer candidateSecondIndex : tableSequenceCandidateIndexNumbers) {
+    //     String candidateNameSecondInPair = 
+    //         arrayOfCandidateNamesForPairwiseCounting.get(candidateSecondIndex - 1);
+    //     if (candidateFirstIndex == candidateSecondIndex) {
+    //       Logger.info(
+    //           "column %d self %s",
+    //           pairwiseColumn,
+    //           candidateNameFirstInPair);
+    //     } else {
+    //       Logger.info(
+    //           "column %d count %s for %s over %s",
+    //           pairwiseColumn,
+    //           pairwiseCountForFirstOverSecondInPair[candidateFirstIndex][candidateSecondIndex]
+    //               .toString(),
+    //           candidateNameFirstInPair,
+    //           candidateNameSecondInPair);
+    //     }
+    //     pairwiseColumn++;
+    //   }
+    //   pairwiseRow++;
+    // }
+    // Logger.info("End pairwise counts");
+
     return true;
   }
 }

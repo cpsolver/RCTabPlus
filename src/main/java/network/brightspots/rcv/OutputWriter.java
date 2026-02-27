@@ -93,7 +93,8 @@ class OutputWriter {
     DETAILED_CSV("detailed_report", "csv"),
     DETAILED_JSON("detailed_report", "json"),
     CDF_CVR("cdf_cvr", "json"),
-    RCTAB_CVR("rctab_cvr", "csv");
+    RCTAB_CVR("rctab_cvr", "csv"),
+    PAIRWISE_CSV("pairwise_counts", "csv");
 
     private final String basename;
     private final String extension;
@@ -1290,5 +1291,55 @@ class OutputWriter {
     String getCvrId() {
       return cvrId;
     }
+  }
+
+  // create a pairwise-counts CSV file
+  public void generatePairwiseCsvReport(
+        List<String> pairwiseCandidateNameOrder,
+        Map<String, Map<String, BigDecimal>> pairwiseCountsAsMap) throws IOException {
+    OutputFileIdentifiers outputFileIdentifiers = new OutputFileIdentifiers(OutputType.PAIRWISE_CSV);
+    AuditableFile csvFile = createAuditableFile(outputFileIdentifiers);
+    Logger.info("Generating pairwise-counts spreadsheet: %s...", csvFile.getAbsolutePath());
+    CSVPrinter csvPrinter;
+    try {
+      BufferedWriter writer = Files.newBufferedWriter(csvFile.toPath());
+      csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT);
+    } catch (IOException exception) {
+      Logger.severe(
+          "Error creating pairwise-counts CSV file: %s\n%s\nCheck the file path and permissions!",
+          csvFile.getAbsolutePath(), exception);
+      throw exception;
+    }
+    csvPrinter.print("Pairwise counts");
+    // heading line includes column candidate names
+    for (String columnCandidateName : pairwiseCandidateNameOrder) {
+      csvPrinter.print(columnCandidateName );
+    }
+    csvPrinter.println();
+    for (String rowCandidateName : pairwiseCandidateNameOrder) {
+      // each data line begins with a row candidate name
+      csvPrinter.print(rowCandidateName );
+      for (String columnCandidateName : pairwiseCandidateNameOrder) {
+        if (columnCandidateName == rowCandidateName) {
+          csvPrinter.print(rowCandidateName);
+        } else {
+          BigDecimal getPairwiseCountsAsMap = BigDecimal.ZERO;
+          csvPrinter.print(getPairwiseCountsAsMap);
+        }
+      }
+      csvPrinter.println();
+    }
+    csvPrinter.println();
+    csvPrinter.print("Each pairwise count is the number of ballots that rank the COLUMN-named candidate higher than the ROW-named candidate");
+    csvPrinter.println();
+    try {
+      csvPrinter.flush();
+      csvPrinter.close();
+      csvFile.finalizeAndHash();
+    } catch (IOException exception) {
+      Logger.severe("Error saving file: %s\n%s", csvFile.getAbsolutePath(), exception);
+      throw exception;
+    }
+    Logger.info("Pairwise count CSV file generated successfully.");
   }
 }
