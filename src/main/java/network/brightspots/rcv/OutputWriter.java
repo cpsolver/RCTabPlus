@@ -739,6 +739,7 @@ class OutputWriter {
   }
 
   // creates a summary spreadsheet and JSON for the full contest (as opposed to a specific slice)
+  // Also creates pairwise count spreadsheet when that option is used.
   void generateContestResultFiles(
       RoundTallies roundTallies,
       TallyTransfers tallyTransfers,
@@ -749,6 +750,9 @@ class OutputWriter {
             new OutputFileIdentifiers(OutputType.DETAILED_CSV));
     generateJsonReport(roundTallies, tallyTransfers,
             new OutputFileIdentifiers(OutputType.DETAILED_JSON));
+    if (config.isEliminatePairwiseLosingEnabled()) {
+      generatePairwiseCsvReport();
+    }
   }
 
   // Write CastVoteRecords for the specified contest to the provided folder,
@@ -1294,9 +1298,7 @@ class OutputWriter {
   }
 
   // create a pairwise-counts CSV file
-  public void generatePairwiseCsvReport(
-        List<String> pairwiseCandidateNameOrder,
-        Map<String, Map<String, BigDecimal>> pairwiseCountsAsMap) throws IOException {
+  public void generatePairwiseCsvReport( ) throws IOException {
     OutputFileIdentifiers outputFileIdentifiers = new OutputFileIdentifiers(OutputType.PAIRWISE_CSV);
     AuditableFile csvFile = createAuditableFile(outputFileIdentifiers);
     Logger.info("Generating pairwise-counts spreadsheet: %s...", csvFile.getAbsolutePath());
@@ -1310,6 +1312,25 @@ class OutputWriter {
           csvFile.getAbsolutePath(), exception);
       throw exception;
     }
+    if (config.isEliminatePairwiseLosingEnabled()) {
+      boolean isPairwiseCountsLogged = pairwiseCounting.logPairwiseCounts();
+      if (!isPairwiseCountsLogged) {
+        Logger.info("Error: Pairwise counting requested but pairwise counting not done!");
+        return;
+      }
+    }
+
+// todo: check for syntax error or symbol access error here ...
+
+    List<String> candidateNameEliminationSequence = Tabulator.getEliminationSequence();
+
+    if (candidateNameEliminationSequence.size() < 3) {
+      Logger.info("Using sequence from pairwise counting table because elimination sequence not known");
+
+// todo: put candidate names into sequence based on position in pairwise count array ...
+
+    }
+
     csvPrinter.print("Pairwise counts");
     // heading line includes column candidate names
     for (String columnCandidateName : pairwiseCandidateNameOrder) {
@@ -1323,8 +1344,12 @@ class OutputWriter {
         if (columnCandidateName == rowCandidateName) {
           csvPrinter.print(rowCandidateName);
         } else {
-          BigDecimal getPairwiseCountsAsMap = BigDecimal.ZERO;
-          csvPrinter.print(getPairwiseCountsAsMap);
+          BigDecimal pairwiseCount = PairwiseCounting.getPairwiseCountForCandidatePair(columnCandidateName, rowCandidateName);
+          if (pairwiseCount.compareTo(BigDecimal.ZERO) > 0) {
+            csvPrinter.print(pairwiseCount.toString);
+          } else {
+            csvPrinter.print("unknown");
+          }
         }
       }
       csvPrinter.println();

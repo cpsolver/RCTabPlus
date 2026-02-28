@@ -305,80 +305,21 @@ final class PairwiseCounting {
     return candidateNamePairwiseLosingCandidate;
   }
 
-  public boolean logPairwiseCounts() {
-    if (haveCurrentPairwiseCounts == false) {
-      Logger.info("Log of pairwise counts requested but counts not yet tabulated");
-      return false;
+  // For reporting purposes only, get the pairwise count between any two candidates.
+  // Returns minus one if the two candidate names are the same,
+  // or if either candidate name is not in the pairwise counts,
+  private BigDecimal getPairwiseCountForCandidatePair(
+        String candidateNameFirstInPair,
+        String candidateNameSecondInPair) {
+    if (candidateNameFirstInPair.equals(candidateNameSecondInPair) {
+      return BigDecimal.ZERO.subtract(1);
     }
-    // Begin to specify candidate sequence in pairwise counting table.
-    List<Integer> tableSequenceCandidateIndexNumbers = new ArrayList();
-    Map<String, Integer> candidateToRoundEliminated = 
-        tabulator.getCandidateToRoundEliminated();
-    if (candidateToRoundEliminated.entrySet().size() > 1) {
-      // Use elimination sequence.
-      tableSequenceCandidateIndexNumbers = candidateToRoundEliminated.entrySet()
-          .stream()
-          .map(Map.Entry::getValue)
-          .collect(Collectors.toList());
+    if ((!indexForCandidateName.containsValue(candidateNameFirstInPair))
+        || (!indexForCandidateName.containsValue(candidateNameSecondInPair))) {
+      return BigDecimal.ZERO.subtract(1);
     }
-    if (tableSequenceCandidateIndexNumbers.size() < 3) {
-      Logger.info("Using default sequence because elimination sequence not known");
-      tableSequenceCandidateIndexNumbers = IntStream.iterate(
-          arrayOfCandidateNamesForPairwiseCounting.size(), i -> i >= 1, i -> i - 1)
-          .boxed().toList();
-    }
-    int pairwiseRow = 1;
-    for (Integer candidateFirstIndex : tableSequenceCandidateIndexNumbers) {
-      String rowCandidateName = 
-          arrayOfCandidateNamesForPairwiseCounting.get(candidateFirstIndex - 1);
-      Map<String, BigDecimal> rowPairwiseData = new LinkedHashMap<>();
-      int pairwiseColumn = 1;
-      for (Integer candidateSecondIndex : tableSequenceCandidateIndexNumbers) {
-        String columnCandidateName = 
-            arrayOfCandidateNamesForPairwiseCounting.get(candidateSecondIndex - 1);
-        rowPairwiseData.put(columnCandidateName, pairwiseCountForFirstOverSecondInPair[candidateFirstIndex][candidateSecondIndex]);
-      }
-      pairwiseCountsAsMap.put(rowCandidateName, rowPairwiseData);
-    }
-    // Write the pairwise CSV report
-    List<String> pairwiseCandidateNameOrder = new ArrayList<>();
-    for (Integer candidateIndex : tableSequenceCandidateIndexNumbers) {
-      pairwiseCandidateNameOrder.add(arrayOfCandidateNamesForPairwiseCounting.get(candidateIndex - 1));
-    }
-    generatePairwiseCsvReport(pairwiseCandidateNameOrder,pairwiseCountsAsMap);
-
-    // Logger.info("Begin pairwise counts");
-    // int pairwiseRow = 1;
-    // for (Integer candidateFirstIndex : tableSequenceCandidateIndexNumbers) {
-    //   String candidateNameFirstInPair = 
-    //       arrayOfCandidateNamesForPairwiseCounting.get(candidateFirstIndex - 1);
-    //   Logger.info(
-    //       "row %d",
-    //           pairwiseRow);
-    //   int pairwiseColumn = 1;
-    //   for (Integer candidateSecondIndex : tableSequenceCandidateIndexNumbers) {
-    //     String candidateNameSecondInPair = 
-    //         arrayOfCandidateNamesForPairwiseCounting.get(candidateSecondIndex - 1);
-    //     if (candidateFirstIndex == candidateSecondIndex) {
-    //       Logger.info(
-    //           "column %d self %s",
-    //           pairwiseColumn,
-    //           candidateNameFirstInPair);
-    //     } else {
-    //       Logger.info(
-    //           "column %d count %s for %s over %s",
-    //           pairwiseColumn,
-    //           pairwiseCountForFirstOverSecondInPair[candidateFirstIndex][candidateSecondIndex]
-    //               .toString(),
-    //           candidateNameFirstInPair,
-    //           candidateNameSecondInPair);
-    //     }
-    //     pairwiseColumn++;
-    //   }
-    //   pairwiseRow++;
-    // }
-    // Logger.info("End pairwise counts");
-
-    return true;
+    int candidateFirstIndex = indexForCandidateName.get(candidateNameFirstInPair);
+    int candidateSecondIndex = indexForCandidateName.get(candidateNameSecondInPair);
+    return pairwiseCountForFirstOverSecondInPair[candidateFirstIndex][candidateSecondIndex];
   }
 }

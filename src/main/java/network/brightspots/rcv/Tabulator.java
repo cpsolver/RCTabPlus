@@ -143,6 +143,26 @@ final class Tabulator {
     return candidateToRoundEliminated;
   }
 
+  // Get candidate elimination sequence if just one elimination per round
+  public LinkedList<String> getEliminationSequence() {
+    LinkedList<String> eliminationSequence = new LinkedList();
+    if (candidateToRoundEliminated.entrySet().size() > 1) {
+      // If more than one candidate was eliminated in the same round, return with null.
+      Set<Integer> valueSet = Set.copyOf(candidateToRoundEliminated.values());
+      if(valueSet.size() != candidateToRoundEliminated.size()) {
+        return null;
+      }
+
+// todo: fix ...
+      eliminationSequence = candidateToRoundEliminated.entrySet()
+          .stream()
+          .map(Map.Entry::byValue)
+          .collect(Collectors.toLinkedList());
+
+    }
+    return eliminationSequence;
+  }
+
   // Utility function to "invert" the input roundTally map into a sorted map of tally
   // to List of candidate IDs. A list is used because multiple candidates may have the same tally.
   // This is used to determine when winners are selected and for running tiebreak logic.
@@ -312,14 +332,6 @@ final class Tabulator {
         updateWinnerTallies();
       }
     }
-
-    if (config.isEliminatePairwiseLosingEnabled()) {
-      boolean isPairwiseCountsLogged = pairwiseCounting.logPairwiseCounts();
-      if (!isPairwiseCountsLogged) {
-        Logger.info("Pairwise counting requested but pairwise counts not logged");
-      }
-    }
-
     return winnerToRound.keySet();
   }
 
