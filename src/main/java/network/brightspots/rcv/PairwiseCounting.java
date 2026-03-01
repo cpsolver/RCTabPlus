@@ -54,8 +54,8 @@ final class PairwiseCounting {
   // Maximum number of continuing candidates to consider for pairwise counting.
   // This number can range from maximum of 7 to minimum of 3.
   private int maximumCandidatesPairwiseCounting = 5;
-  // List of names of continuing candidates.
-  private ArrayList<String> arrayOfCandidateNamesForPairwiseCounting = new ArrayList<>();
+  // List of names of continuing candidates when pairwise counting first done.
+  public ArrayList<String> arrayOfCandidateNamesForPairwiseCounting = new ArrayList<>();
   // Associate each continuing candidate name with a position in the pairwise counting array.
   private HashMap<String, Integer> indexForCandidateName = new HashMap<>();
   private BigDecimal[][] pairwiseCountForFirstOverSecondInPair;
@@ -311,12 +311,12 @@ final class PairwiseCounting {
   private BigDecimal getPairwiseCountForCandidatePair(
         String candidateNameFirstInPair,
         String candidateNameSecondInPair) {
-    if (candidateNameFirstInPair.equals(candidateNameSecondInPair) {
-      return BigDecimal.ZERO.subtract(1);
+    if (candidateNameFirstInPair.equals(candidateNameSecondInPair)) {
+      return BigDecimal.ZERO.subtract(BigDecimal.ONE);
     }
     if ((!indexForCandidateName.containsValue(candidateNameFirstInPair))
-        || (!indexForCandidateName.containsValue(candidateNameSecondInPair))) {
-      return BigDecimal.ZERO.subtract(1);
+        || (!indexForCandidateName.containsKey(candidateNameSecondInPair))) {
+      return BigDecimal.ZERO.subtract(BigDecimal.ONE);
     }
     int candidateFirstIndex = indexForCandidateName.get(candidateNameFirstInPair);
     int candidateSecondIndex = indexForCandidateName.get(candidateNameSecondInPair);

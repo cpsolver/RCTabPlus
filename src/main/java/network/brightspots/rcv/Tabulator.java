@@ -153,11 +153,12 @@ final class Tabulator {
         return null;
       }
 
-// todo: fix ...
+      // TODO: fix this code
       eliminationSequence = candidateToRoundEliminated.entrySet()
           .stream()
-          .map(Map.Entry::byValue)
-          .collect(Collectors.toLinkedList());
+          .sorted(Map.Entry.comparingByValue())
+          .map(Map.Entry::getKey)
+          .collections(LinkedList::new);
 
     }
     return eliminationSequence;
@@ -912,7 +913,8 @@ final class Tabulator {
             .setContestConfig(config)
             .setTimestampString(timestamp)
             .setSliceIds(sliceIds)
-            .setRoundToResidualSurplus(roundToResidualSurplus);
+            .setRoundToResidualSurplus(roundToResidualSurplus)
+            .setPairwiseCounting(pairwiseCounting);
 
     List<String> candidateOrder = roundTallies.get(1).getSortedCandidatesByTally();
     writer.generateContestResultFiles(roundTallies, tallyTransfers, candidateOrder);

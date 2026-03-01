@@ -87,6 +87,7 @@ class OutputWriter {
           StatusForRound.INVALIDATED_BY_SKIPPED_RANKING,
           StatusForRound.EXHAUSTED_CHOICE,
           StatusForRound.INVALIDATED_BY_REPEATED_RANKING);
+  private PairwiseCounting pairwiseCounting;
 
   public enum OutputType {
     SUMMARY_CSV("summary_report", "csv"),
@@ -111,6 +112,11 @@ class OutputWriter {
     public String getExtension() {
       return extension;
     }
+  }
+
+  OutputWriter setPairwiseCounting(PairwiseCounting pairwiseCounting) {
+    this.pairwiseCounting = pairwiseCounting;
+    return this;
   }
 
   /**
@@ -1312,24 +1318,18 @@ class OutputWriter {
           csvFile.getAbsolutePath(), exception);
       throw exception;
     }
-    if (config.isEliminatePairwiseLosingEnabled()) {
-      boolean isPairwiseCountsLogged = pairwiseCounting.logPairwiseCounts();
-      if (!isPairwiseCountsLogged) {
-        Logger.info("Error: Pairwise counting requested but pairwise counting not done!");
-        return;
-      }
-    }
 
-// todo: check for syntax error or symbol access error here ...
+    // if (candidateNameEliminationSequence.size() < 3) {
+    Logger.info("Using sequence from pairwise counting table "
+        + "because elimination sequence not known");
 
-    List<String> candidateNameEliminationSequence = Tabulator.getEliminationSequence();
 
-    if (candidateNameEliminationSequence.size() < 3) {
-      Logger.info("Using sequence from pairwise counting table because elimination sequence not known");
+    // TODO: debug compiler errors here, then get candidate elimination sequence from TallyDecision in Tabulator file
+    List<String> candidateNameEliminationSequence =
+        PairwiseCounting.arrayOfCandidateNamesForPairwiseCounting.keySet();
 
-// todo: put candidate names into sequence based on position in pairwise count array ...
 
-    }
+    // }
 
     csvPrinter.print("Pairwise counts");
     // heading line includes column candidate names
@@ -1341,12 +1341,14 @@ class OutputWriter {
       // each data line begins with a row candidate name
       csvPrinter.print(rowCandidateName );
       for (String columnCandidateName : pairwiseCandidateNameOrder) {
-        if (columnCandidateName == rowCandidateName) {
+        if (columnCandidateName.equals(rowCandidateName)) {
           csvPrinter.print(rowCandidateName);
         } else {
-          BigDecimal pairwiseCount = PairwiseCounting.getPairwiseCountForCandidatePair(columnCandidateName, rowCandidateName);
+          BigDecimal pairwiseCount =
+              PairwiseCounting.getPairwiseCountForCandidatePair(
+              columnCandidateName, rowCandidateName);
           if (pairwiseCount.compareTo(BigDecimal.ZERO) > 0) {
-            csvPrinter.print(pairwiseCount.toString);
+            csvPrinter.print(pairwiseCount.toString());
           } else {
             csvPrinter.print("unknown");
           }
