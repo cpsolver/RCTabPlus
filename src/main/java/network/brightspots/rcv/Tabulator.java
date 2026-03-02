@@ -36,6 +36,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 import javafx.util.Pair;
 import network.brightspots.rcv.CandidatesAtRanking.CandidatesAtRankingIterator;
 import network.brightspots.rcv.CastVoteRecord.StatusForRound;
@@ -149,7 +150,7 @@ final class Tabulator {
     if (candidateToRoundEliminated.entrySet().size() > 1) {
       // If more than one candidate was eliminated in the same round, return with null.
       Set<Integer> valueSet = Set.copyOf(candidateToRoundEliminated.values());
-      if(valueSet.size() != candidateToRoundEliminated.size()) {
+      if (valueSet.size() != candidateToRoundEliminated.size()) {
         return null;
       }
 
@@ -158,7 +159,7 @@ final class Tabulator {
           .stream()
           .sorted(Map.Entry.comparingByValue())
           .map(Map.Entry::getKey)
-          .collections(LinkedList::new);
+          .collect(Collectors.toCollection(LinkedList::new));
 
     }
     return eliminationSequence;

@@ -1303,9 +1303,10 @@ class OutputWriter {
     }
   }
 
-  // create a pairwise-counts CSV file
-  public void generatePairwiseCsvReport( ) throws IOException {
-    OutputFileIdentifiers outputFileIdentifiers = new OutputFileIdentifiers(OutputType.PAIRWISE_CSV);
+  // create a CSV file with the pairwise counts
+  public void generatePairwiseCsvReport() throws IOException {
+    OutputFileIdentifiers outputFileIdentifiers =
+        new OutputFileIdentifiers(OutputType.PAIRWISE_CSV);
     AuditableFile csvFile = createAuditableFile(outputFileIdentifiers);
     Logger.info("Generating pairwise-counts spreadsheet: %s...", csvFile.getAbsolutePath());
     CSVPrinter csvPrinter;
@@ -1319,33 +1320,29 @@ class OutputWriter {
       throw exception;
     }
 
-    // if (candidateNameEliminationSequence.size() < 3) {
-    Logger.info("Using sequence from pairwise counting table "
-        + "because elimination sequence not known");
+    List<String> pairwiseCandidateNameOrder =
+        pairwiseCounting.arrayOfCandidateNamesForPairwiseCounting;
 
-
-    // TODO: debug compiler errors here, then get candidate elimination sequence from TallyDecision in Tabulator file
-    List<String> candidateNameEliminationSequence =
-        PairwiseCounting.arrayOfCandidateNamesForPairwiseCounting.keySet();
-
-
-    // }
+    if (pairwiseCandidateNameOrder.size() < 3) {
+      Logger.info("Using sequence from pairwise counting table "
+          + "because elimination sequence not known");
+    }
 
     csvPrinter.print("Pairwise counts");
     // heading line includes column candidate names
     for (String columnCandidateName : pairwiseCandidateNameOrder) {
-      csvPrinter.print(columnCandidateName );
+      csvPrinter.print(columnCandidateName);
     }
     csvPrinter.println();
     for (String rowCandidateName : pairwiseCandidateNameOrder) {
       // each data line begins with a row candidate name
-      csvPrinter.print(rowCandidateName );
+      csvPrinter.print(rowCandidateName);
       for (String columnCandidateName : pairwiseCandidateNameOrder) {
         if (columnCandidateName.equals(rowCandidateName)) {
           csvPrinter.print(rowCandidateName);
         } else {
           BigDecimal pairwiseCount =
-              PairwiseCounting.getPairwiseCountForCandidatePair(
+              pairwiseCounting.getPairwiseCountForCandidatePair(
               columnCandidateName, rowCandidateName);
           if (pairwiseCount.compareTo(BigDecimal.ZERO) > 0) {
             csvPrinter.print(pairwiseCount.toString());
@@ -1357,7 +1354,8 @@ class OutputWriter {
       csvPrinter.println();
     }
     csvPrinter.println();
-    csvPrinter.print("Each pairwise count is the number of ballots that rank the COLUMN-named candidate higher than the ROW-named candidate");
+    csvPrinter.print("Each pairwise count is the number of ballots "
+      + "that rank the COLUMN-named candidate higher than the ROW-named candidate");
     csvPrinter.println();
     try {
       csvPrinter.flush();

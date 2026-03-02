@@ -49,16 +49,16 @@ final class PairwiseCounting {
   private final List<CastVoteRecord> castVoteRecords;
   private final ContestConfig config;
 
-  // Number of candidates actually included in pairwise counts.
-  private int numberOfCandidatesPairwiseCounting;
   // Maximum number of continuing candidates to consider for pairwise counting.
   // This number can range from maximum of 7 to minimum of 3.
   private int maximumCandidatesPairwiseCounting = 5;
+  // Number of candidates actually included in pairwise counts.
+  private int numberOfCandidatesPairwiseCounting;
   // List of names of continuing candidates when pairwise counting first done.
   public ArrayList<String> arrayOfCandidateNamesForPairwiseCounting = new ArrayList<>();
   // Associate each continuing candidate name with a position in the pairwise counting array.
-  private HashMap<String, Integer> indexForCandidateName = new HashMap<>();
-  private BigDecimal[][] pairwiseCountForFirstOverSecondInPair;
+  private static HashMap<String, Integer> indexForCandidateName = new HashMap<>();
+  private static BigDecimal[][] pairwiseCountForFirstOverSecondInPair;
   private boolean haveCurrentPairwiseCounts = false;
   // Make the pairwise counts available to the report writer
   public Map<String, Map<String, BigDecimal>> pairwiseCountsAsMap = new LinkedHashMap<>();
@@ -308,7 +308,7 @@ final class PairwiseCounting {
   // For reporting purposes only, get the pairwise count between any two candidates.
   // Returns minus one if the two candidate names are the same,
   // or if either candidate name is not in the pairwise counts,
-  private BigDecimal getPairwiseCountForCandidatePair(
+  public BigDecimal getPairwiseCountForCandidatePair(
         String candidateNameFirstInPair,
         String candidateNameSecondInPair) {
     if (candidateNameFirstInPair.equals(candidateNameSecondInPair)) {
