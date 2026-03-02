@@ -1308,7 +1308,7 @@ class OutputWriter {
     OutputFileIdentifiers outputFileIdentifiers =
         new OutputFileIdentifiers(OutputType.PAIRWISE_CSV);
     AuditableFile csvFile = createAuditableFile(outputFileIdentifiers);
-    Logger.info("Generating pairwise-counts spreadsheet: %s...", csvFile.getAbsolutePath());
+    Logger.info("Generating spreadsheet with pairwise counts: %s...", csvFile.getAbsolutePath());
     CSVPrinter csvPrinter;
     try {
       BufferedWriter writer = Files.newBufferedWriter(csvFile.toPath());
@@ -1320,14 +1320,16 @@ class OutputWriter {
       throw exception;
     }
 
+// TODO: debug commented lines here
+//    List<String> pairwiseCandidateNameOrder =
+//        Tabulator.getEliminationSequence();
+//    if (pairwiseCandidateNameOrder.size() < 3) {
+//      pairwiseCandidateNameOrder =
     List<String> pairwiseCandidateNameOrder =
         pairwiseCounting.arrayOfCandidateNamesForPairwiseCounting;
-
-    if (pairwiseCandidateNameOrder.size() < 3) {
-      Logger.info("Using sequence from pairwise counting table "
-          + "because elimination sequence not known");
-    }
-
+    Logger.info("Using sequence from pairwise counting table "
+        + "because elimination sequence not known");
+//    }
     csvPrinter.print("Pairwise counts");
     // heading line includes column candidate names
     for (String columnCandidateName : pairwiseCandidateNameOrder) {
@@ -1339,7 +1341,7 @@ class OutputWriter {
       csvPrinter.print(rowCandidateName);
       for (String columnCandidateName : pairwiseCandidateNameOrder) {
         if (columnCandidateName.equals(rowCandidateName)) {
-          csvPrinter.print(rowCandidateName);
+          csvPrinter.print("self");
         } else {
           BigDecimal pairwiseCount =
               pairwiseCounting.getPairwiseCountForCandidatePair(

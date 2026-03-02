@@ -314,7 +314,7 @@ final class PairwiseCounting {
     if (candidateNameFirstInPair.equals(candidateNameSecondInPair)) {
       return BigDecimal.ZERO.subtract(BigDecimal.ONE);
     }
-    if ((!indexForCandidateName.containsValue(candidateNameFirstInPair))
+    if ((!indexForCandidateName.containsKey(candidateNameFirstInPair))
         || (!indexForCandidateName.containsKey(candidateNameSecondInPair))) {
       return BigDecimal.ZERO.subtract(BigDecimal.ONE);
     }

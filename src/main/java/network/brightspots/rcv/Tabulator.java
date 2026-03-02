@@ -153,14 +153,11 @@ final class Tabulator {
       if (valueSet.size() != candidateToRoundEliminated.size()) {
         return null;
       }
-
-      // TODO: fix this code
       eliminationSequence = candidateToRoundEliminated.entrySet()
           .stream()
           .sorted(Map.Entry.comparingByValue())
           .map(Map.Entry::getKey)
           .collect(Collectors.toCollection(LinkedList::new));
-
     }
     return eliminationSequence;
   }
