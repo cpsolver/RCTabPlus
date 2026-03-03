@@ -55,6 +55,10 @@ import network.brightspots.rcv.ContestConfig.TabulateBySlice;
 import network.brightspots.rcv.RawContestConfig.CvrSource;
 import network.brightspots.rcv.Tabulator.RoundTallies;
 import network.brightspots.rcv.Tabulator.SliceIdSet;
+
+// TODO: fix this
+// import network.brightspots.rcv.Tabulator.pairwiseLosingRounds;
+
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 
@@ -87,6 +91,7 @@ class OutputWriter {
           StatusForRound.INVALIDATED_BY_SKIPPED_RANKING,
           StatusForRound.EXHAUSTED_CHOICE,
           StatusForRound.INVALIDATED_BY_REPEATED_RANKING);
+  private List<String> candidateEliminationSequence;
   private PairwiseCounting pairwiseCounting;
 
   public enum OutputType {
@@ -240,6 +245,11 @@ class OutputWriter {
 
   static String sanitizeStringForOutput(String s) {
     return s == null ? "" : s.replaceAll("[^a-zA-Z0-9_\\-.]", "_");
+  }
+
+  public OutputWriter setCandidateEliminationSequence(List<String> candidateEliminationSequence){
+    this.candidateEliminationSequence = candidateEliminationSequence;
+    return this;
   }
 
   private static void generateJsonFile(AuditableFile outFile, Map<String, Object> json)
@@ -1315,21 +1325,21 @@ class OutputWriter {
       csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT);
     } catch (IOException exception) {
       Logger.severe(
-          "Error creating pairwise-counts CSV file: %s\n%s\nCheck the file path and permissions!",
+          "Error creating pairwise-counts CSV file: %s\n%s\nCheck file path and permissions!",
           csvFile.getAbsolutePath(), exception);
       throw exception;
     }
-
-// TODO: debug commented lines here
-//    List<String> pairwiseCandidateNameOrder =
-//        Tabulator.getEliminationSequence();
-//    if (pairwiseCandidateNameOrder.size() < 3) {
-//      pairwiseCandidateNameOrder =
-    List<String> pairwiseCandidateNameOrder =
-        pairwiseCounting.arrayOfCandidateNamesForPairwiseCounting;
-    Logger.info("Using sequence from pairwise counting table "
-        + "because elimination sequence not known");
-//    }
+    List<String> pairwiseCandidateNameOrder;
+    if ((candidateEliminationSequence != null) && (candidateEliminationSequence.size() >= 3)) {
+      pairwiseCandidateNameOrder = candidateEliminationSequence;
+      // Exclude candidates not involved in pairwise counting.
+      pairwiseCandidateNameOrder
+          .retainAll(pairwiseCounting.arrayOfCandidateNamesForPairwiseCounting);
+    } else {
+      pairwiseCandidateNameOrder = pairwiseCounting.arrayOfCandidateNamesForPairwiseCounting;
+      Logger.info("Using sequence from pairwise counting table "
+          + "because elimination sequence not known");
+    }
     csvPrinter.print("Pairwise counts");
     // heading line includes column candidate names
     for (String columnCandidateName : pairwiseCandidateNameOrder) {
@@ -1356,7 +1366,19 @@ class OutputWriter {
       csvPrinter.println();
     }
     csvPrinter.println();
-    csvPrinter.print("Each pairwise count is the number of ballots "
+    csvPrinter.print("Pairwise losing candidate");
+    csvPrinter.print("Round eliminated");
+    csvPrinter.println();
+
+    // TODO: fix this code:
+//    for (Map<String, Integer> candidateNameAndRound : pairwiseCounting.pairwiseLosingRounds) {
+//      csvPrinter.print(candidateNameAndRound.getKey());
+//      csvPrinter.print(candidateNameAndRound.getValue());
+//    }
+
+    csvPrinter.println();
+    csvPrinter.println();
+    csvPrinter.print("In the pairwise counts at the top, each count is the number of ballots "
       + "that rank the COLUMN-named candidate higher than the ROW-named candidate");
     csvPrinter.println();
     try {

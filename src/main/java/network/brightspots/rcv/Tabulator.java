@@ -102,6 +102,9 @@ final class Tabulator {
   // tracks pairwise counting
   private PairwiseCounting pairwiseCounting;
 
+// TODO: find out how to avoid making this public?
+//  public static HashMap<String, Integer> pairwiseLosingRounds = new HashMap<>();
+
   Tabulator(List<CastVoteRecord> castVoteRecords, ContestConfig config)
       throws TabulationAbortedException {
     this.castVoteRecords = castVoteRecords;
@@ -304,6 +307,10 @@ final class Tabulator {
                     false,
                     currentRound)
             );
+
+// TODO: fix this code
+//            pairwiseLosingRounds.put(candidateNamePairwiseLosingCandidate, currentRound);
+
             Logger.info(
                 "Candidate \"%s\" was eliminated in round %d as a pairwise losing candidate.",
                 candidateNamePairwiseLosingCandidate, currentRound);
@@ -912,7 +919,8 @@ final class Tabulator {
             .setTimestampString(timestamp)
             .setSliceIds(sliceIds)
             .setRoundToResidualSurplus(roundToResidualSurplus)
-            .setPairwiseCounting(pairwiseCounting);
+            .setPairwiseCounting(pairwiseCounting)
+            .setCandidateEliminationSequence(getEliminationSequence());
 
     List<String> candidateOrder = roundTallies.get(1).getSortedCandidatesByTally();
     writer.generateContestResultFiles(roundTallies, tallyTransfers, candidateOrder);
