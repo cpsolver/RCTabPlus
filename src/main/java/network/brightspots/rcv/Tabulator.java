@@ -101,9 +101,10 @@ final class Tabulator {
   private int currentRound = 0;
   // tracks pairwise counting
   private PairwiseCounting pairwiseCounting;
-
-// TODO: find out how to avoid making this public?
-//  public static HashMap<String, Integer> pairwiseLosingRounds = new HashMap<>();
+  // track which round applies to each pairwise losing candidate
+  private final Map<String, Integer> pairwiseLosingRounds = new HashMap<>();
+  // track elimination sequence
+  private LinkedList<String> eliminationSequence = new LinkedList();
 
   Tabulator(List<CastVoteRecord> castVoteRecords, ContestConfig config)
       throws TabulationAbortedException {
@@ -137,19 +138,20 @@ final class Tabulator {
     }
   }
 
-  // Access to current round number
   public int getCurrentRoundNumber() {
     return currentRound;
   }
 
-  // Access to when candidates were eliminated
+  public Map<String, Integer> getpairwiseLosingRounds() {
+    return pairwiseLosingRounds;
+  }
+
   public Map<String, Integer> getCandidateToRoundEliminated() {
     return candidateToRoundEliminated;
   }
 
   // Get candidate elimination sequence if just one elimination per round
   public LinkedList<String> getEliminationSequence() {
-    LinkedList<String> eliminationSequence = new LinkedList();
     if (candidateToRoundEliminated.entrySet().size() > 1) {
       // If more than one candidate was eliminated in the same round, return with null.
       Set<Integer> valueSet = Set.copyOf(candidateToRoundEliminated.values());
@@ -307,10 +309,7 @@ final class Tabulator {
                     false,
                     currentRound)
             );
-
-// TODO: fix this code
-//            pairwiseLosingRounds.put(candidateNamePairwiseLosingCandidate, currentRound);
-
+            pairwiseLosingRounds.put(candidateNamePairwiseLosingCandidate, currentRound);
             Logger.info(
                 "Candidate \"%s\" was eliminated in round %d as a pairwise losing candidate.",
                 candidateNamePairwiseLosingCandidate, currentRound);
@@ -920,7 +919,8 @@ final class Tabulator {
             .setSliceIds(sliceIds)
             .setRoundToResidualSurplus(roundToResidualSurplus)
             .setPairwiseCounting(pairwiseCounting)
-            .setCandidateEliminationSequence(getEliminationSequence());
+            .setCandidateEliminationSequence(eliminationSequence)
+            .setPairwiseLosingRounds(pairwiseLosingRounds);
 
     List<String> candidateOrder = roundTallies.get(1).getSortedCandidatesByTally();
     writer.generateContestResultFiles(roundTallies, tallyTransfers, candidateOrder);
