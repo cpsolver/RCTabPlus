@@ -249,7 +249,7 @@ class OutputWriter {
     return s == null ? "" : s.replaceAll("[^a-zA-Z0-9_\\-.]", "_");
   }
 
-  public OutputWriter setCandidateEliminationSequence(List<String> candidateEliminationSequence){
+  public OutputWriter setCandidateEliminationSequence(List<String> candidateEliminationSequence) {
     this.candidateEliminationSequence = candidateEliminationSequence;
     return this;
   }
@@ -1339,13 +1339,9 @@ class OutputWriter {
       pairwiseCandidateNameOrder
           .retainAll(pairwiseCounting.arrayOfCandidateNamesForPairwiseCounting);
     } else {
-
-
-// TODO: sort alphabetically
-      pairwiseCandidateNameOrder =
-          Collections.sort(pairwiseCounting.arrayOfCandidateNamesForPairwiseCounting);
-
-
+      pairwiseCandidateNameOrder = pairwiseCounting.arrayOfCandidateNamesForPairwiseCounting;
+      // Sort alphabetically
+      Collections.sort(pairwiseCandidateNameOrder);
       isEliminationSequence = false;
     }
     csvPrinter.print("Pairwise counts");
@@ -1386,7 +1382,7 @@ class OutputWriter {
     }
     csvPrinter.println();
     csvPrinter.print("In the pairwise counts at the top, each count is the number of ballots "
-      + "that rank the COLUMN-named candidate higher than the ROW-named candidate");
+        + "that rank the COLUMN-named candidate higher than the ROW-named candidate");
     csvPrinter.println();
     if (isEliminationSequence == true) {
       csvPrinter.print("The sequence matches the elimination sequence");
