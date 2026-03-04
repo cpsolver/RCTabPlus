@@ -277,6 +277,8 @@ public class GuiConfigController implements Initializable {
   @FXML
   private CheckBox checkBoxFirstRoundDeterminesThreshold;
   @FXML
+  private CheckBox checkBoxEliminatePairwiseLosing;
+  @FXML
   private TextField textFieldStopTabulationEarlyAfterRound;
   @FXML
   private CheckBox checkBoxExhaustOnDuplicateCandidate;
@@ -1073,6 +1075,8 @@ public class GuiConfigController implements Initializable {
     checkBoxContinueUntilTwoCandidatesRemain.setDisable(true);
     checkBoxFirstRoundDeterminesThreshold.setSelected(false);
     checkBoxFirstRoundDeterminesThreshold.setDisable(true);
+    checkBoxEliminatePairwiseLosing.setSelected(false);
+    checkBoxEliminatePairwiseLosing.setDisable(true);
     choiceTiebreakMode.setValue(null);
     choiceTiebreakMode.setDisable(true);
     clearAndDisableTiebreakFields();
@@ -1104,6 +1108,7 @@ public class GuiConfigController implements Initializable {
         .setSelected(ContestConfig.SUGGESTED_CONTINUE_UNTIL_TWO_CANDIDATES_REMAIN);
     checkBoxFirstRoundDeterminesThreshold
             .setSelected(ContestConfig.SUGGESTED_FIRST_ROUND_DETERMINES_THRESHOLD);
+    checkBoxEliminatePairwiseLosing.setSelected(ContestConfig.SUGGESTED_ELIMINATE_PAIRWISE_LOSING);
     textFieldDecimalPlacesForVoteArithmetic.setText(
         String.valueOf(ContestConfig.SUGGESTED_DECIMAL_PLACES_FOR_VOTE_ARITHMETIC));
     checkBoxMaxRankingsAllowedMax.setSelected(ContestConfig.SUGGESTED_MAX_RANKINGS_ALLOWED_MAXIMUM);
@@ -1538,6 +1543,7 @@ public class GuiConfigController implements Initializable {
           checkBoxBatchElimination.setDisable(false);
           checkBoxContinueUntilTwoCandidatesRemain.setDisable(false);
           checkBoxFirstRoundDeterminesThreshold.setDisable(false);
+          checkBoxEliminatePairwiseLosing.setDisable(false);
           textFieldNumberOfWinners.setText("1");
         }
         case MULTI_SEAT_ALLOW_ONLY_ONE_WINNER_PER_ROUND,
@@ -1547,10 +1553,12 @@ public class GuiConfigController implements Initializable {
           radioThresholdHareQuota.setDisable(false);
           textFieldDecimalPlacesForVoteArithmetic.setDisable(false);
           textFieldNumberOfWinners.setDisable(false);
+          checkBoxEliminatePairwiseLosing.setDisable(true);
         }
         case MULTI_SEAT_SEQUENTIAL_WINNER_TAKES_ALL -> {
           textFieldNumberOfWinners.setDisable(false);
           checkBoxBatchElimination.setDisable(false);
+          checkBoxEliminatePairwiseLosing.setDisable(false);
         }
         case MULTI_SEAT_BOTTOMS_UP_UNTIL_N_WINNERS -> {
           textFieldNumberOfWinners.setDisable(false);
@@ -1561,6 +1569,7 @@ public class GuiConfigController implements Initializable {
           checkBoxFirstRoundDeterminesThreshold.setDisable(false);
           textFieldMultiSeatBottomsUpPercentageThreshold.setDisable(false);
           checkBoxCutoffElimination.setDisable(false);
+          checkBoxEliminatePairwiseLosing.setDisable(false);
         }
         case MODE_UNKNOWN -> {
           // Do nothing
@@ -1716,6 +1725,7 @@ public class GuiConfigController implements Initializable {
     checkBoxCutoffElimination.setSelected(rules.cutoffElimination);
     checkBoxContinueUntilTwoCandidatesRemain.setSelected(rules.continueUntilTwoCandidatesRemain);
     checkBoxFirstRoundDeterminesThreshold.setSelected(rules.doesFirstRoundDetermineThreshold);
+    checkBoxEliminatePairwiseLosing.setSelected(rules.eliminatePairwiseLosing);
     textFieldStopTabulationEarlyAfterRound.setText(rules.stopTabulationEarlyAfterRound);
     checkBoxExhaustOnDuplicateCandidate.setSelected(rules.exhaustOnDuplicateCandidate);
   }
@@ -1811,6 +1821,7 @@ public class GuiConfigController implements Initializable {
     rules.cutoffElimination = checkBoxCutoffElimination.isSelected();
     rules.continueUntilTwoCandidatesRemain = checkBoxContinueUntilTwoCandidatesRemain.isSelected();
     rules.doesFirstRoundDetermineThreshold = checkBoxFirstRoundDeterminesThreshold.isSelected();
+    rules.eliminatePairwiseLosing = checkBoxEliminatePairwiseLosing.isSelected();
     rules.stopTabulationEarlyAfterRound =
         getTextOrEmptyString(textFieldStopTabulationEarlyAfterRound);
     rules.exhaustOnDuplicateCandidate = checkBoxExhaustOnDuplicateCandidate.isSelected();

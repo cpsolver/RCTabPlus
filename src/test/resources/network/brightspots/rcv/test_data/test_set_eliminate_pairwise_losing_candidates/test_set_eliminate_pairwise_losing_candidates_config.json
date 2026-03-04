@@ -1,17 +1,17 @@
 {
   "tabulatorVersion" : "2.0.1",
   "outputSettings" : {
-    "contestName" : "Count-overvote-when-single-for-multi-winner",
-    "outputDirectory" : "/home/aw/RCTab/rcv/src/test/resources/network/brightspots/rcv/test_data/test_set_count_overvote_when_single_for_multi_winner/output",
-    "contestDate" : "2026-01-26",
-    "contestJurisdiction" : "Wikipedia STV example plus overvotes",
-    "contestOffice" : "Three foods to serve",
+    "contestName" : "test-set=eliminate-pairwise-losing-candidates",
+    "outputDirectory" : "/home/aw/RCTab/rcv/src/test/resources/network/brightspots/rcv/test_data/test_set_eliminate_pairwise_losing_candidates/output",
+    "contestDate" : "2026-02-24",
+    "contestJurisdiction" : "Portlandia",
+    "contestOffice" : "Mayor",
     "tabulateByBatch" : false,
     "tabulateByPrecinct" : false,
     "generateCdfJson" : true
   },
   "cvrFileSources" : [ {
-    "filePath" : "test_set_count_overvote_when_single_for_multi_winner_ballots.csv",
+    "filePath" : "test_set_eliminate_pairwise_losing_candidates_ballots.csv",
     "contestId" : "",
     "firstVoteColumnIndex" : "4",
     "firstVoteRowIndex" : "2",
@@ -26,44 +26,40 @@
     "treatBlankAsUndeclaredWriteIn" : false
   } ],
   "candidates" : [ {
-    "name" : "oranges",
+    "name" : "cand_A",
     "excluded" : false,
     "aliases" : [ ]
   }, {
-    "name" : "pears",
+    "name" : "cand_B",
     "excluded" : false,
     "aliases" : [ ]
   }, {
-    "name" : "strawberries",
+    "name" : "cand_C",
     "excluded" : false,
     "aliases" : [ ]
   }, {
-    "name" : "cake",
+    "name" : "cand_D",
     "excluded" : false,
     "aliases" : [ ]
   }, {
-    "name" : "chocolate",
+    "name" : "cand_E",
     "excluded" : false,
     "aliases" : [ ]
   }, {
-    "name" : "burgers",
-    "excluded" : false,
-    "aliases" : [ ]
-  }, {
-    "name" : "chicken",
+    "name" : "cand_F",
     "excluded" : false,
     "aliases" : [ ]
   } ],
   "rules" : {
-    "tiebreakMode" : "random",
-    "overvoteRule" : "countWhenSingleContinuing",
-    "winnerElectionMode" : "multiWinnerAllowOnlyOneWinnerPerRound",
-    "randomSeed" : "0",
-    "numberOfWinners" : "3",
+    "tiebreakMode" : "useCandidateOrder",
+    "overvoteRule" : "exhaustIfMultipleContinuing",
+    "winnerElectionMode" : "singleWinnerMajority",
+    "randomSeed" : "6152519",
+    "numberOfWinners" : "1",
     "multiSeatBottomsUpPercentageThreshold" : "",
     "decimalPlacesForVoteArithmetic" : "4",
     "maxSkippedRanksAllowed" : "unlimited",
-    "maxRankingsAllowed" : "max",
+    "maxRankingsAllowed" : "10",
     "nonIntegerWinningThreshold" : false,
     "doesFirstRoundDetermineThreshold" : false,
     "hareQuota" : false,
@@ -72,6 +68,7 @@
     "continueUntilTwoCandidatesRemain" : false,
     "stopTabulationEarlyAfterRound" : "",
     "exhaustOnDuplicateCandidate" : false,
+    "eliminatePairwiseLosing" : true,
     "rulesDescription" : "Test_Case",
     "treatBlankAsUndeclaredWriteIn" : false
   }

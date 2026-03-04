@@ -56,6 +56,7 @@ class ContestConfig {
   static final boolean SUGGESTED_BATCH_ELIMINATION = false;
   static final boolean SUGGESTED_CUTOFF_ELIMINATION = false;
   static final boolean SUGGESTED_CONTINUE_UNTIL_TWO_CANDIDATES_REMAIN = false;
+  static final boolean SUGGESTED_ELIMINATE_PAIRWISE_LOSING = false;
   static final boolean SUGGESTED_EXHAUST_ON_DUPLICATE_CANDIDATES = false;
   static final boolean SUGGESTED_FIRST_ROUND_DETERMINES_THRESHOLD = false;
   static final boolean SUGGESTED_TREAT_BLANK_AS_UNDECLARED_WRITE_IN = false;
@@ -876,6 +877,13 @@ class ContestConfig {
       Logger.severe(
           "nonIntegerWinningThreshold and hareQuota can't both be true at the same time!");
     }
+
+    if (isMultiSeatBottomsUpWithThresholdEnabled() && isEliminatePairwiseLosingEnabled()) {
+      validationErrors.add(
+              ValidationError.RULES_BOTTOMS_UP_THRESHOLD_ELIMINATE_PAIRWISE_DISAGREEMENT);
+      Logger.severe(
+          "eliminatePairwiseLosing can't be true when winnerElectionMode is \"%s\"!", winnerMode);
+    }
   }
 
   private String getNumberOfWinnersRaw() {
@@ -1165,6 +1173,10 @@ class ContestConfig {
         : Integer.parseInt(getStopTabulationEarlyAfterRoundRaw());
   }
 
+  boolean isEliminatePairwiseLosingEnabled() {
+    return rawConfig.rules.eliminatePairwiseLosing;
+  }
+
   int getNumDeclaredCandidates() {
     int size = getCandidateNames().size();
     if (undeclaredWriteInsEnabled()) {
@@ -1354,7 +1366,8 @@ class ContestConfig {
     RULES_BOTTOMS_UP_THRESHOLD_BATCH_ELIMINATION_DISAGREEMENT,
     RULES_NON_INTEGER_WINNING_THRESHOLD_WINNER_ELECTION_MODE_DISAGREEMENT,
     RULES_HARE_QUOTA_WINNER_ELECTION_MODE_DISAGREEMENT,
-    RULES_NON_INTEGER_WINNING_THRESHOLD_HARE_QUOTA_DISAGREEMENT
+    RULES_NON_INTEGER_WINNING_THRESHOLD_HARE_QUOTA_DISAGREEMENT,
+    RULES_BOTTOMS_UP_THRESHOLD_ELIMINATE_PAIRWISE_DISAGREEMENT
   }
 
   enum Provider {

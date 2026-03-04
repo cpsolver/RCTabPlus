@@ -87,13 +87,17 @@ class OutputWriter {
           StatusForRound.INVALIDATED_BY_SKIPPED_RANKING,
           StatusForRound.EXHAUSTED_CHOICE,
           StatusForRound.INVALIDATED_BY_REPEATED_RANKING);
+  private List<String> candidateEliminationSequence;
+  private PairwiseCounting pairwiseCounting;
+  private Map<String, Integer> pairwiseLosingRounds;
 
   public enum OutputType {
     SUMMARY_CSV("summary_report", "csv"),
     DETAILED_CSV("detailed_report", "csv"),
     DETAILED_JSON("detailed_report", "json"),
     CDF_CVR("cdf_cvr", "json"),
-    RCTAB_CVR("rctab_cvr", "csv");
+    RCTAB_CVR("rctab_cvr", "csv"),
+    PAIRWISE_CSV("pairwise_counts", "csv");
 
     private final String basename;
     private final String extension;
@@ -110,6 +114,16 @@ class OutputWriter {
     public String getExtension() {
       return extension;
     }
+  }
+
+  OutputWriter setPairwiseCounting(PairwiseCounting pairwiseCounting) {
+    this.pairwiseCounting = pairwiseCounting;
+    return this;
+  }
+
+  OutputWriter setPairwiseLosingRounds(Map<String, Integer> pairwiseLosingRounds) {
+    this.pairwiseLosingRounds = pairwiseLosingRounds;
+    return this;
   }
 
   /**
@@ -233,6 +247,11 @@ class OutputWriter {
 
   static String sanitizeStringForOutput(String s) {
     return s == null ? "" : s.replaceAll("[^a-zA-Z0-9_\\-.]", "_");
+  }
+
+  public OutputWriter setCandidateEliminationSequence(List<String> candidateEliminationSequence){
+    this.candidateEliminationSequence = candidateEliminationSequence;
+    return this;
   }
 
   private static void generateJsonFile(AuditableFile outFile, Map<String, Object> json)
@@ -738,6 +757,7 @@ class OutputWriter {
   }
 
   // creates a summary spreadsheet and JSON for the full contest (as opposed to a specific slice)
+  // Also creates pairwise count spreadsheet when that option is used.
   void generateContestResultFiles(
       RoundTallies roundTallies,
       TallyTransfers tallyTransfers,
@@ -748,6 +768,9 @@ class OutputWriter {
             new OutputFileIdentifiers(OutputType.DETAILED_CSV));
     generateJsonReport(roundTallies, tallyTransfers,
             new OutputFileIdentifiers(OutputType.DETAILED_JSON));
+    if (config.isEliminatePairwiseLosingEnabled()) {
+      generatePairwiseCsvReport();
+    }
   }
 
   // Write CastVoteRecords for the specified contest to the provided folder,
@@ -1290,5 +1313,96 @@ class OutputWriter {
     String getCvrId() {
       return cvrId;
     }
+  }
+
+  // create a CSV file with the pairwise counts
+  public void generatePairwiseCsvReport() throws IOException {
+    OutputFileIdentifiers outputFileIdentifiers =
+        new OutputFileIdentifiers(OutputType.PAIRWISE_CSV);
+    AuditableFile csvFile = createAuditableFile(outputFileIdentifiers);
+    Logger.info("Generating spreadsheet with pairwise counts: %s...", csvFile.getAbsolutePath());
+    CSVPrinter csvPrinter;
+    try {
+      BufferedWriter writer = Files.newBufferedWriter(csvFile.toPath());
+      csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT);
+    } catch (IOException exception) {
+      Logger.severe(
+          "Error creating pairwise-counts CSV file: %s\n%s\nCheck file path and permissions!",
+          csvFile.getAbsolutePath(), exception);
+      throw exception;
+    }
+    List<String> pairwiseCandidateNameOrder;
+    boolean isEliminationSequence = true;
+    if ((candidateEliminationSequence != null) && (candidateEliminationSequence.size() >= 3)) {
+      pairwiseCandidateNameOrder = candidateEliminationSequence;
+      // Exclude candidates not involved in pairwise counting.
+      pairwiseCandidateNameOrder
+          .retainAll(pairwiseCounting.arrayOfCandidateNamesForPairwiseCounting);
+    } else {
+
+
+// TODO: sort alphabetically
+      pairwiseCandidateNameOrder =
+          Collections.sort(pairwiseCounting.arrayOfCandidateNamesForPairwiseCounting);
+
+
+      isEliminationSequence = false;
+    }
+    csvPrinter.print("Pairwise counts");
+    // heading line includes column candidate names
+    for (String columnCandidateName : pairwiseCandidateNameOrder) {
+      csvPrinter.print(columnCandidateName);
+    }
+    csvPrinter.println();
+    for (String rowCandidateName : pairwiseCandidateNameOrder) {
+      // each data line begins with a row candidate name
+      csvPrinter.print(rowCandidateName);
+      for (String columnCandidateName : pairwiseCandidateNameOrder) {
+        if (columnCandidateName.equals(rowCandidateName)) {
+          csvPrinter.print("self");
+        } else {
+          BigDecimal pairwiseCount =
+              pairwiseCounting.getPairwiseCountForCandidatePair(
+              columnCandidateName, rowCandidateName);
+          if (pairwiseCount.compareTo(BigDecimal.ZERO) > 0) {
+            csvPrinter.print(pairwiseCount.toString());
+          } else {
+            csvPrinter.print("unknown");
+          }
+        }
+      }
+      csvPrinter.println();
+    }
+    csvPrinter.println();
+    csvPrinter.print("Pairwise losing candidate");
+    csvPrinter.print("Round eliminated");
+    csvPrinter.println();
+    if (pairwiseLosingRounds != null) {
+      for (Map.Entry<String, Integer> candidateNameAndRound : pairwiseLosingRounds.entrySet()) {
+        csvPrinter.print(candidateNameAndRound.getKey());
+        csvPrinter.print(candidateNameAndRound.getValue());
+        csvPrinter.println();
+      }
+    }
+    csvPrinter.println();
+    csvPrinter.print("In the pairwise counts at the top, each count is the number of ballots "
+      + "that rank the COLUMN-named candidate higher than the ROW-named candidate");
+    csvPrinter.println();
+    if (isEliminationSequence == true) {
+      csvPrinter.print("The sequence matches the elimination sequence");
+      csvPrinter.println();
+    } else {
+      csvPrinter.print("The sequence is alphabetical");
+      csvPrinter.println();
+    }
+    try {
+      csvPrinter.flush();
+      csvPrinter.close();
+      csvFile.finalizeAndHash();
+    } catch (IOException exception) {
+      Logger.severe("Error saving file: %s\n%s", csvFile.getAbsolutePath(), exception);
+      throw exception;
+    }
+    Logger.info("Pairwise count CSV file generated successfully.");
   }
 }

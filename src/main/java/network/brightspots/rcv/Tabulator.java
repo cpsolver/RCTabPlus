@@ -21,7 +21,6 @@
 
 package network.brightspots.rcv;
 
-import static network.brightspots.rcv.CastVoteRecord.StatusForRound;
 import static network.brightspots.rcv.Utils.isNullOrBlank;
 
 import java.io.IOException;
@@ -37,7 +36,10 @@ import java.util.Random;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 import javafx.util.Pair;
+import network.brightspots.rcv.CandidatesAtRanking.CandidatesAtRankingIterator;
+import network.brightspots.rcv.CastVoteRecord.StatusForRound;
 import network.brightspots.rcv.CastVoteRecord.VoteOutcomeType;
 import network.brightspots.rcv.ContestConfig.TabulateBySlice;
 import network.brightspots.rcv.OutputWriter.RoundSnapshotDataMissingException;
@@ -66,6 +68,7 @@ final class Tabulator {
   static final String OVERVOTE_RULE_EXHAUST_IMMEDIATELY_TEXT = "Exhaust immediately";
   static final String OVERVOTE_RULE_EXHAUST_IF_MULTIPLE_TEXT = "Exhaust if multiple continuing";
   static final String OVERVOTE_RULE_COUNT_WHEN_SINGLE_TEXT = "Count when single continuing";
+  static final String ELIMINATE_PAIRWISE_LOSING_CANDIDATES = "Eliminate pairwise losing candidates";
   // When the CVR contains an overvote we "normalize" it to use this string
   static final String EXPLICIT_OVERVOTE_LABEL = "overvote";
   // Similarly, we normalize undeclared write-ins to use this string
@@ -97,12 +100,19 @@ final class Tabulator {
   private final SliceIdSet sliceIds = new SliceIdSet();
   // tracks the current round (and when tabulation is completed, the total number of rounds)
   private int currentRound = 0;
+  // tracks pairwise counting
+  private PairwiseCounting pairwiseCounting;
+  // track which round applies to each pairwise losing candidate
+  private final Map<String, Integer> pairwiseLosingRounds = new HashMap<>();
+  // track elimination sequence
+  private LinkedList<String> eliminationSequence = new LinkedList();
 
   Tabulator(List<CastVoteRecord> castVoteRecords, ContestConfig config)
       throws TabulationAbortedException {
     this.castVoteRecords = castVoteRecords;
     this.candidateNames = config.getCandidateNames();
     this.config = config;
+    this.pairwiseCounting = new PairwiseCounting(this, castVoteRecords, config);
 
     sliceIds.initialize(ContestConfig.TabulateBySlice.BATCH);
     sliceIds.initialize(ContestConfig.TabulateBySlice.PRECINCT);
@@ -125,9 +135,37 @@ final class Tabulator {
             slice, slice.toString().toLowerCase());
         throw new TabulationAbortedException(false);
       }
-
       initTabulateBySliceRoundTallies(slice);
     }
+  }
+
+  public int getCurrentRoundNumber() {
+    return currentRound;
+  }
+
+  public Map<String, Integer> getpairwiseLosingRounds() {
+    return pairwiseLosingRounds;
+  }
+
+  public Map<String, Integer> getCandidateToRoundEliminated() {
+    return candidateToRoundEliminated;
+  }
+
+  // Get candidate elimination sequence if just one elimination per round
+  public LinkedList<String> getEliminationSequence() {
+    if (candidateToRoundEliminated.entrySet().size() > 1) {
+      // If more than one candidate was eliminated in the same round, return with null.
+      Set<Integer> valueSet = Set.copyOf(candidateToRoundEliminated.values());
+      if (valueSet.size() != candidateToRoundEliminated.size()) {
+        return null;
+      }
+      eliminationSequence = candidateToRoundEliminated.entrySet()
+          .stream()
+          .sorted(Map.Entry.comparingByValue())
+          .map(Map.Entry::getKey)
+          .collect(Collectors.toCollection(LinkedList::new));
+    }
+    return eliminationSequence;
   }
 
   // Utility function to "invert" the input roundTally map into a sorted map of tally
@@ -247,9 +285,8 @@ final class Tabulator {
         // a) we haven't found all the winners yet, or
         // b) we've found our winner, but we're continuing until we have only two candidates
         // c) not all remaining candidates meet the bottoms-up threshold
-
         List<TallyDecision> eliminated;
-        // Four mutually exclusive ways to eliminate candidates.
+        // Five mutually exclusive ways to eliminate candidates.
         // 1. Some races contain undeclared write-ins that should be dropped immediately.
         eliminated = dropUndeclaredWriteIns(currentRoundTally);
         // 2. if we have a cutoffThreshold, eliminate everyone under it
@@ -260,8 +297,27 @@ final class Tabulator {
         if (eliminated.isEmpty()) {
           eliminated = doBatchElimination(currentRoundTallyToCandidates);
         }
-        // 4. If we didn't do batch elimination, eliminate the remaining candidate with the lowest
-        //    tally, breaking a tie if needed.
+        // 4. Otherwise, possibly eliminate a pairwise losing candidate.
+        // A counting round cannot have more than one pairwise losing candidate.
+        if (eliminated.isEmpty() && config.isEliminatePairwiseLosingEnabled()) {
+          String candidateNamePairwiseLosingCandidate = 
+              pairwiseCounting.getPairwiseLosingCandidate();
+          if (candidateNamePairwiseLosingCandidate != null) {
+            eliminated = List.of(
+                new TallyDecision(
+                    candidateNamePairwiseLosingCandidate,
+                    TallyDecision.DecisionType.ELIMINATED,
+                    false,
+                    currentRound)
+            );
+            pairwiseLosingRounds.put(candidateNamePairwiseLosingCandidate, currentRound);
+            Logger.info(
+                "Candidate \"%s\" was eliminated in round %d as a pairwise losing candidate.",
+                candidateNamePairwiseLosingCandidate, currentRound);
+          }
+        }
+        // 5. If we haven't yet eliminated at least one candidate,
+        // eliminate the remaining candidate with the lowest tally, breaking a tie if needed.
         if (eliminated.isEmpty()) {
           eliminated = doRegularElimination(currentRoundTallyToCandidates);
         }
@@ -542,7 +598,7 @@ final class Tabulator {
 
   // Handles continued tabulation after a winner has been chosen when
   // continueUntilTwoCandidatesRemain is true.
-  private boolean isCandidateContinuing(String candidate) {
+  public boolean isCandidateContinuing(String candidate) {
     CandidateStatus status = getCandidateStatus(candidate);
     return status == CandidateStatus.CONTINUING
         || (status == CandidateStatus.WINNER && config.isContinueUntilTwoCandidatesRemainEnabled());
@@ -561,6 +617,17 @@ final class Tabulator {
       status = CandidateStatus.INVALID;
     }
     return status;
+  }
+
+  // Count number of continuing candidates.
+  public int countContinuingCandidates() {
+    int numberOfContinuingCandidates = 0;
+    for (String candidate : config.getCandidateNames()) {
+      if (isCandidateContinuing(candidate)) {
+        numberOfContinuingCandidates++;
+      }
+    }
+    return numberOfContinuingCandidates;
   }
 
   // determine if one or more winners have been identified in this round
@@ -855,7 +922,10 @@ final class Tabulator {
             .setContestConfig(config)
             .setTimestampString(timestamp)
             .setSliceIds(sliceIds)
-            .setRoundToResidualSurplus(roundToResidualSurplus);
+            .setRoundToResidualSurplus(roundToResidualSurplus)
+            .setPairwiseCounting(pairwiseCounting)
+            .setCandidateEliminationSequence(eliminationSequence)
+            .setPairwiseLosingRounds(pairwiseLosingRounds);
 
     List<String> candidateOrder = roundTallies.get(1).getSortedCandidatesByTally();
     writer.generateContestResultFiles(roundTallies, tallyTransfers, candidateOrder);
@@ -976,7 +1046,6 @@ final class Tabulator {
       } else {
         decision = OvervoteDecision.SKIP_TO_NEXT_RANK;
       }
-
     } else if (candidates.count() <= 1) {
       // if undervote or one vote which is not the overvote label, then there is no overvote
       decision = OvervoteDecision.NONE;
