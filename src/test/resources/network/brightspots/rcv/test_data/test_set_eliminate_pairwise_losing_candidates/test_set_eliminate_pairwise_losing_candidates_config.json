@@ -1,5 +1,5 @@
 {
-  "tabulatorVersion" : "2.0.1",
+  "tabulatorVersion" : "2.0.2",
   "outputSettings" : {
     "contestName" : "test-set=eliminate-pairwise-losing-candidates",
     "outputDirectory" : "/home/aw/RCTab/rcv/src/test/resources/network/brightspots/rcv/test_data/test_set_eliminate_pairwise_losing_candidates/output",

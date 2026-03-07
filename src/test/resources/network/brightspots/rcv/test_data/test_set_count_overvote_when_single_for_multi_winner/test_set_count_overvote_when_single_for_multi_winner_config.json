@@ -1,5 +1,5 @@
 {
-  "tabulatorVersion" : "2.0.1",
+  "tabulatorVersion" : "2.0.2",
   "outputSettings" : {
     "contestName" : "Count-overvote-when-single-for-multi-winner",
     "outputDirectory" : "/home/aw/RCTab/rcv/src/test/resources/network/brightspots/rcv/test_data/test_set_count_overvote_when_single_for_multi_winner/output",
