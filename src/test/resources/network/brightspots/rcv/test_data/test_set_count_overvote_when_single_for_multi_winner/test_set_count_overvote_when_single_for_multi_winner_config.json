@@ -72,6 +72,7 @@
     "continueUntilTwoCandidatesRemain" : false,
     "stopTabulationEarlyAfterRound" : "",
     "exhaustOnDuplicateCandidate" : false,
+    "eliminatePairwiseLosing" : false,
     "rulesDescription" : "Test_Case",
     "treatBlankAsUndeclaredWriteIn" : false
   }

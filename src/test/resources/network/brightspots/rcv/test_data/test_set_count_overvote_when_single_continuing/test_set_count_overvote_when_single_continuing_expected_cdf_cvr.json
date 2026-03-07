@@ -3152,7 +3152,7 @@
           "SelectionPosition" : [ {
             "@type" : "CVR.SelectionPosition",
             "HasIndication" : "yes",
-
+            "IsAllocable" : "yes",
             "NumberVotes" : 1,
             "Rank" : 1
           } ]
@@ -4167,7 +4167,7 @@
     } ],
     "ElectionScopeId" : "gpu-election"
   } ],
-  "GeneratedDate" : "2026-02-07T10:55:33-08:00",
+  "GeneratedDate" : "2026-03-07T08:34:46-08:00",
   "GpUnit" : [ {
     "@id" : "gpu-election",
     "@type" : "GpUnit",

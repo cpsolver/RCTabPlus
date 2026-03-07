@@ -2,7 +2,7 @@
   "config" : {
     "contest" : "Count-overvote-when-single-continuing",
     "date" : "2026-01-26",
-    "generatedBy" : "RCTab 2.0.1",
+    "generatedBy" : "RCTab 2.0.2",
     "jurisdiction" : "Portlandia",
     "office" : "Mayor"
   },
@@ -68,15 +68,15 @@
       "cand_E" : "2"
     },
     "tallyResults" : [ {
-      "eliminated" : "cand_D",
+      "eliminated" : "cand_E",
       "transfers" : {
-        "exhausted" : "3"
+        "exhausted" : "2"
       }
     } ],
     "threshold" : "11"
   }, {
     "inactiveBallots" : {
-      "exhaustedChoices" : "4",
+      "exhaustedChoices" : "3",
       "overvotes" : "4",
       "repeatedRankings" : "0",
       "skippedRankings" : "0"
@@ -86,15 +86,15 @@
       "cand_A" : "6",
       "cand_B" : "5",
       "cand_C" : "4",
-      "cand_E" : "2"
+      "cand_D" : "3"
     },
     "tallyResults" : [ {
-      "eliminated" : "cand_E",
+      "eliminated" : "cand_D",
       "transfers" : {
-        "exhausted" : "2"
+        "exhausted" : "3"
       }
     } ],
-    "threshold" : "9"
+    "threshold" : "10"
   }, {
     "inactiveBallots" : {
       "exhaustedChoices" : "6",
