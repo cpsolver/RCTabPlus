@@ -26,7 +26,6 @@ package network.brightspots.rcv;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -57,11 +56,10 @@ final class PairwiseCounting {
   // List of names of continuing candidates when pairwise counting first done.
   public ArrayList<String> arrayOfCandidateNamesForPairwiseCounting = new ArrayList<>();
   // Associate each continuing candidate name with a position in the pairwise counting array.
-  private static HashMap<String, Integer> indexForCandidateName = new HashMap<>();
-  private static BigDecimal[][] pairwiseCountForFirstOverSecondInPair;
+  private HashMap<String, Integer> indexForCandidateName = new HashMap<>();
+  private BigDecimal[][] pairwiseCountForFirstOverSecondInPair;
   private boolean haveCurrentPairwiseCounts = false;
-  // Make the pairwise counts available to the report writer
-  public Map<String, Map<String, BigDecimal>> pairwiseCountsAsMap = new LinkedHashMap<>();
+
 
   PairwiseCounting(
         Tabulator tabulator, List<CastVoteRecord> castVoteRecords, ContestConfig config) {
