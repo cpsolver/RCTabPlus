@@ -39,7 +39,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
-import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -156,7 +155,7 @@ class OutputWriter {
   public static class OutputFileIdentifiers {
     // Since sanitizing Slice IDs can cause filename collisions, ensure each non-sanitized
     // Slice ID is given a unique sanitized name.
-    private static final Dictionary<String, String> sliceIdToUniqueSanitizedId = new Hashtable<>();
+    private static final Map<String, String> sliceIdToUniqueSanitizedId = new HashMap<>();
     // This is a set of the values in sanitizerCollisionResolution to ensure there are no collisions
     // in the resulting sanitized names.
     private static final HashSet<String> uniqueSanitizedIds = new HashSet<>();
@@ -1265,7 +1264,7 @@ class OutputWriter {
           }
         }
         if (!action.containsKey("transfers")) {
-          action.put("transfers", new HashMap<String, BigDecimal>());
+          action.put("transfers", new HashMap<>());
         }
         actions.add(action);
       }
