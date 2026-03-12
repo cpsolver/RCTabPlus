@@ -1342,8 +1342,8 @@ class OutputWriter {
 
 
 // TODO: sort alphabetically
-      pairwiseCandidateNameOrder =
-          Collections.sort(pairwiseCounting.arrayOfCandidateNamesForPairwiseCounting);
+      pairwiseCandidateNameOrder = pairwiseCounting.arrayOfCandidateNamesForPairwiseCounting;
+      Collections.sort(pairwiseCandidateNameOrder);
 
 
       isEliminationSequence = false;
