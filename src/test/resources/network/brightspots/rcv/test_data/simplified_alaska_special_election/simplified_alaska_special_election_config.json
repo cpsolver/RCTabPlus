@@ -26,27 +26,15 @@
     "treatBlankAsUndeclaredWriteIn" : false
   } ],
   "candidates" : [ {
-    "name" : "cand_A",
+    "name" : "Peltola",
     "excluded" : false,
     "aliases" : [ ]
   }, {
-    "name" : "cand_B",
+    "name" : "Palin",
     "excluded" : false,
     "aliases" : [ ]
   }, {
-    "name" : "cand_C",
-    "excluded" : false,
-    "aliases" : [ ]
-  }, {
-    "name" : "cand_D",
-    "excluded" : false,
-    "aliases" : [ ]
-  }, {
-    "name" : "cand_E",
-    "excluded" : false,
-    "aliases" : [ ]
-  }, {
-    "name" : "cand_F",
+    "name" : "Begich",
     "excluded" : false,
     "aliases" : [ ]
   } ],
