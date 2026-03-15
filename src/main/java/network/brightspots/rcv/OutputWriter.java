@@ -1339,13 +1339,9 @@ class OutputWriter {
       pairwiseCandidateNameOrder
           .retainAll(pairwiseCounting.arrayOfCandidateNamesForPairwiseCounting);
     } else {
-
-
-// TODO: sort alphabetically
+      // Sort alphabetically
       pairwiseCandidateNameOrder = pairwiseCounting.arrayOfCandidateNamesForPairwiseCounting;
       Collections.sort(pairwiseCandidateNameOrder);
-
-
       isEliminationSequence = false;
     }
     csvPrinter.print("Pairwise counts");
