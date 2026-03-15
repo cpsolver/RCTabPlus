@@ -142,26 +142,27 @@ final class PairwiseCounting {
   // ballots (including exhausted ballots).
   // Returns: True if pairwise counting done, false if not done.
   public boolean doPairwiseCounting() {
-    // Pairwise counts do not change if only one candidate can win.
-    if ((haveCurrentPairwiseCounts) && (config.getNumberOfWinners() < 2)) {
-      return false;
+    if (haveCurrentPairwiseCounts) {
+      Logger.info("Already have pairwise counts.");
+      return true;
     }
-
-    // For now, specify numberOfCandidatesPairwiseCounting.
-    // Later, get number from config info.
-    numberOfCandidatesPairwiseCounting = 5;
-
-    // Pairwise counting is not done if there are too many continuing candidates.
-    if ((tabulator.countContinuingCandidates() > numberOfCandidatesPairwiseCounting)
-        || (numberOfCandidatesPairwiseCounting > maximumCandidatesPairwiseCounting)) {
+    if ((tabulator.countContinuingCandidates() > maximumCandidatesPairwiseCounting)) {
+      Logger.info("Pairwise counting not done because too many continuing candidates.");
       return false;
     }
     generateListOfCandidateNamesForPairwiseCounting();
     numberOfCandidatesPairwiseCounting = arrayOfCandidateNamesForPairwiseCounting.size();
-    // Also not done if only one or two candidate names found.
-    if (numberOfCandidatesPairwiseCounting < 3) {
+    if ( numberOfCandidatesPairwiseCounting > maximumCandidatesPairwiseCounting) {
+      Logger.info("Still too many continuing candidates to do pairwise counting.");
       return false;
     }
+
+// TODO: fix bug near here
+    if (numberOfCandidatesPairwiseCounting < 3) {
+      Logger.info("Pairwise counting not done because only %d candidates.", numberOfCandidatesPairwiseCounting);
+      return false;
+    }
+
     initializePairwiseCounts();
     int currentRound = tabulator.getCurrentRoundNumber();
     Logger.info("Doing pairwise counting in round %d", currentRound);
@@ -251,12 +252,24 @@ final class PairwiseCounting {
   // If there is a pairwise losing candidate, return its name.
   // Otherwise return null.
   public String getPairwiseLosingCandidate() {
+
+    Logger.info(
+        "Checking for pairwise losing candidate.");
+
     boolean pairwiseCountingDone = doPairwiseCounting();
     String candidateNamePairwiseLosingCandidate = null;
-    if (!pairwiseCountingDone
-        || (numberOfCandidatesPairwiseCounting > maximumCandidatesPairwiseCounting)) {
+    if (!pairwiseCountingDone) {
+      Logger.info("Pairwise counting was not done.");
       return candidateNamePairwiseLosingCandidate;
     }
+    if (numberOfCandidatesPairwiseCounting >= maximumCandidatesPairwiseCounting) {
+      Logger.info("Pairwise counting not done because would exceed maximum.");
+      return candidateNamePairwiseLosingCandidate;
+    }
+
+    Logger.info(
+        "Still checking for pairwise losing candidate.");
+
     boolean encounteredOnlyLosses = false;
     String candidateNameFirstInPair = null;
     String candidateNameSecondInPair = null;
@@ -267,6 +280,11 @@ final class PairwiseCounting {
         candidateFirstIndex++) {
       candidateNameFirstInPair = 
           arrayOfCandidateNamesForPairwiseCounting.get(candidateFirstIndex - 1);
+
+      Logger.info(
+          "Checking possible pairwise losing candidate %s.",
+          candidateNameFirstInPair);
+
       // Allow for candidate eliminations after pairwise counting was done.
       if (!tabulator.isCandidateContinuing(candidateNameFirstInPair)) {
         continue;
@@ -282,6 +300,11 @@ final class PairwiseCounting {
         }
         candidateNameSecondInPair = arrayOfCandidateNamesForPairwiseCounting.get(
             candidateSecondIndex - 1);
+
+        Logger.info(
+            "Checking possible pairwise losing candidate %s.",
+            candidateNameSecondInPair);
+
         // Allow for candidate eliminations after pairwise counting was done.
         if (!tabulator.isCandidateContinuing(candidateNameSecondInPair)) {
           continue;
