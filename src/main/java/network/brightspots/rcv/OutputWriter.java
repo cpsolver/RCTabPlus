@@ -1360,7 +1360,7 @@ class OutputWriter {
           BigDecimal pairwiseCount =
               pairwiseCounting.getPairwiseCountForCandidatePair(
               columnCandidateName, rowCandidateName);
-          if (pairwiseCount.compareTo(BigDecimal.ZERO) > 0) {
+          if (pairwiseCount.compareTo(BigDecimal.ZERO) >= 0) {
             csvPrinter.print(pairwiseCount.toString());
           } else {
             csvPrinter.print("unknown");
