@@ -1,0 +1,76 @@
+{
+  "config" : {
+    "contest" : "simplified-alaska-special-election",
+    "date" : "2026-03-12",
+    "generatedBy" : "RCTab 2.0.1",
+    "jurisdiction" : "simplified Alaska special congressional election",
+    "office" : "US congressional seat"
+  },
+  "jsonFormatVersion" : "1",
+  "results" : [ {
+    "inactiveBallots" : {
+      "exhaustedChoices" : "0",
+      "overvotes" : "0",
+      "repeatedRankings" : "0",
+      "skippedRankings" : "0"
+    },
+    "round" : 1,
+    "tally" : {
+      "Begich" : "10",
+      "Palin" : "11",
+      "Peltola" : "14",
+      "Undeclared Write-ins" : "0"
+    },
+    "tallyResults" : [ {
+      "eliminated" : "Undeclared Write-ins",
+      "transfers" : { }
+    } ],
+    "threshold" : "18"
+  }, {
+    "inactiveBallots" : {
+      "exhaustedChoices" : "0",
+      "overvotes" : "0",
+      "repeatedRankings" : "0",
+      "skippedRankings" : "0"
+    },
+    "round" : 2,
+    "tally" : {
+      "Begich" : "10",
+      "Palin" : "11",
+      "Peltola" : "14"
+    },
+    "tallyResults" : [ {
+      "eliminated" : "Palin",
+      "transfers" : {
+        "Begich" : "6",
+        "Peltola" : "1",
+        "exhausted" : "4"
+      }
+    } ],
+    "threshold" : "18"
+  }, {
+    "inactiveBallots" : {
+      "exhaustedChoices" : "4",
+      "overvotes" : "0",
+      "repeatedRankings" : "0",
+      "skippedRankings" : "0"
+    },
+    "round" : 3,
+    "tally" : {
+      "Begich" : "16",
+      "Peltola" : "15"
+    },
+    "tallyResults" : [ {
+      "elected" : "Begich",
+      "transfers" : { }
+    } ],
+    "threshold" : "16"
+  } ],
+  "summary" : {
+    "finalThreshold" : "16",
+    "numCandidates" : 4,
+    "numWinners" : 1,
+    "totalNumBallots" : "35",
+    "undervotes" : 0
+  }
+}

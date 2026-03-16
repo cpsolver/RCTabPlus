@@ -1012,4 +1012,10 @@ class TabulatorTests {
     runTabulationTest("test_set_eliminate_pairwise_losing_candidates");
   }
 
+  @Test
+  @DisplayName("simplified alaska special election")
+  void simplified_alaska_special_election() {
+    runTabulationTest("simplified_alaska_special_election");
+  }
+
 }
