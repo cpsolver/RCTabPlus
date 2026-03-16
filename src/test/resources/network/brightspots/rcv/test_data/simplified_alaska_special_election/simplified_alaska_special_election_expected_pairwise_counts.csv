@@ -1,0 +1,12 @@
+Pairwise counts,Begich,Palin,Peltola,Undeclared Write-ins
+Begich,self,12,15,0
+Palin,19,self,17,0
+Peltola,16,16,self,0
+Undeclared Write-ins,27,29,29,self
+
+Pairwise losing candidate,Round eliminated
+Undeclared Write-ins,1
+Palin,2
+
+"In the pairwise counts at the top, each count is the number of ballots that rank the COLUMN-named candidate higher than the ROW-named candidate"
+The sequence is alphabetical
