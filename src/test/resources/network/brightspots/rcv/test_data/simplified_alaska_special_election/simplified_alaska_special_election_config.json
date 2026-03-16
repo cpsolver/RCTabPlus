@@ -1,5 +1,5 @@
 {
-  "tabulatorVersion" : "2.0.1",
+  "tabulatorVersion" : "2.0.2",
   "outputSettings" : {
     "contestName" : "simplified-alaska-special-election",
     "outputDirectory" : "/home/aw/RCTab/rcv/src/test/resources/network/brightspots/rcv/test_data/simplified_alaska_special_election/output",
