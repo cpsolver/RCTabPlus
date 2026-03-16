@@ -155,12 +155,13 @@ final class PairwiseCounting {
     }
     generateListOfCandidateNamesForPairwiseCounting();
     numberOfCandidatesPairwiseCounting = arrayOfCandidateNamesForPairwiseCounting.size();
-    if ( numberOfCandidatesPairwiseCounting > maximumCandidatesPairwiseCounting) {
+    if (numberOfCandidatesPairwiseCounting > maximumCandidatesPairwiseCounting) {
       Logger.info("Still too many continuing candidates to do pairwise counting.");
       return false;
     }
     if (numberOfCandidatesPairwiseCounting < 3) {
-      Logger.info("Pairwise counting not done because only %d candidates.", numberOfCandidatesPairwiseCounting);
+      Logger.info("Pairwise counting not done because only %d candidates.",
+          numberOfCandidatesPairwiseCounting);
       return false;
     }
     Logger.info("Calculating pairwise counts");
@@ -259,7 +260,6 @@ final class PairwiseCounting {
       Logger.info("Pairwise counting not yet done because too many continuing candidates.");
       return candidateNamePairwiseLosingCandidate;
     }
-    boolean pairwiseCountingDone = doPairwiseCounting();
     if (!pairwiseCountingDone) {
       Logger.info("Pairwise counting was not done, reason is logged above.");
       return candidateNamePairwiseLosingCandidate;
