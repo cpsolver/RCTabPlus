@@ -26,6 +26,7 @@ package network.brightspots.rcv;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -56,10 +57,11 @@ final class PairwiseCounting {
   // List of names of continuing candidates when pairwise counting first done.
   public ArrayList<String> arrayOfCandidateNamesForPairwiseCounting = new ArrayList<>();
   // Associate each continuing candidate name with a position in the pairwise counting array.
-  private HashMap<String, Integer> indexForCandidateName = new HashMap<>();
-  private BigDecimal[][] pairwiseCountForFirstOverSecondInPair;
+  private static HashMap<String, Integer> indexForCandidateName = new HashMap<>();
+  private static BigDecimal[][] pairwiseCountForFirstOverSecondInPair;
   private boolean haveCurrentPairwiseCounts = false;
-
+  // Make the pairwise counts available to the report writer
+  public Map<String, Map<String, BigDecimal>> pairwiseCountsAsMap = new LinkedHashMap<>();
 
   PairwiseCounting(
         Tabulator tabulator, List<CastVoteRecord> castVoteRecords, ContestConfig config) {
@@ -81,9 +83,10 @@ final class PairwiseCounting {
       // Limit to continuing candidates
       if (tabulator.isCandidateContinuing(candidate)) {
         // List is empty if continuing candidate count would exceed expected limit.
-        if (candidateIndex >= numberOfCandidatesPairwiseCounting) {
+        if (candidateIndex >= maximumCandidatesPairwiseCounting) {
           arrayOfCandidateNamesForPairwiseCounting.clear();
           indexForCandidateName.clear();
+          Logger.info("Candidate count of %d exceeds pairwise limit", candidateIndex);
           return;
         }
         arrayOfCandidateNamesForPairwiseCounting.add(candidate);
@@ -138,28 +141,29 @@ final class PairwiseCounting {
   // The number of ballots that rank both candidates the same is not needed,
   // but can be calculated by subtracting both pairwise counts from the total number of
   // ballots (including exhausted ballots).
+  // Check if too many, or too few, continuing candidates, just in case those checks
+  // were not done before getting here.
   // Returns: True if pairwise counting done, false if not done.
   public boolean doPairwiseCounting() {
-    // Pairwise counts do not change if only one candidate can win.
-    if ((haveCurrentPairwiseCounts) && (config.getNumberOfWinners() < 2)) {
-      return false;
+    if (haveCurrentPairwiseCounts) {
+      Logger.info("Already have pairwise counts.");
+      return true;
     }
-
-    // For now, specify numberOfCandidatesPairwiseCounting.
-    // Later, get number from config info.
-    numberOfCandidatesPairwiseCounting = 5;
-
-    // Pairwise counting is not done if there are too many continuing candidates.
-    if ((tabulator.countContinuingCandidates() > numberOfCandidatesPairwiseCounting)
-        || (numberOfCandidatesPairwiseCounting > maximumCandidatesPairwiseCounting)) {
+    if (tabulator.countContinuingCandidates() > maximumCandidatesPairwiseCounting) {
+      Logger.info("Pairwise counting not done because too many continuing candidates.");
       return false;
     }
     generateListOfCandidateNamesForPairwiseCounting();
     numberOfCandidatesPairwiseCounting = arrayOfCandidateNamesForPairwiseCounting.size();
-    // Also not done if only one or two candidate names found.
-    if (numberOfCandidatesPairwiseCounting < 3) {
+    if ( numberOfCandidatesPairwiseCounting > maximumCandidatesPairwiseCounting) {
+      Logger.info("Still too many continuing candidates to do pairwise counting.");
       return false;
     }
+    if (numberOfCandidatesPairwiseCounting < 3) {
+      Logger.info("Pairwise counting not done because only %d candidates.", numberOfCandidatesPairwiseCounting);
+      return false;
+    }
+    Logger.info("Calculating pairwise counts");
     initializePairwiseCounts();
     int currentRound = tabulator.getCurrentRoundNumber();
     Logger.info("Doing pairwise counting in round %d", currentRound);
@@ -251,8 +255,13 @@ final class PairwiseCounting {
   public String getPairwiseLosingCandidate() {
     boolean pairwiseCountingDone = doPairwiseCounting();
     String candidateNamePairwiseLosingCandidate = null;
-    if (!pairwiseCountingDone
-        || (numberOfCandidatesPairwiseCounting > maximumCandidatesPairwiseCounting)) {
+    if (tabulator.countContinuingCandidates() > maximumCandidatesPairwiseCounting) {
+      Logger.info("Pairwise counting not yet done because too many continuing candidates.");
+      return candidateNamePairwiseLosingCandidate;
+    }
+    boolean pairwiseCountingDone = doPairwiseCounting();
+    if (!pairwiseCountingDone) {
+      Logger.info("Pairwise counting was not done, reason is logged above.");
       return candidateNamePairwiseLosingCandidate;
     }
     boolean encounteredOnlyLosses = false;
@@ -265,7 +274,7 @@ final class PairwiseCounting {
         candidateFirstIndex++) {
       candidateNameFirstInPair = 
           arrayOfCandidateNamesForPairwiseCounting.get(candidateFirstIndex - 1);
-      // Allow for candidate eliminations after pairwise counting was done.
+      // Skip over candidates eliminated after pairwise counting was done.
       if (!tabulator.isCandidateContinuing(candidateNameFirstInPair)) {
         continue;
       }
