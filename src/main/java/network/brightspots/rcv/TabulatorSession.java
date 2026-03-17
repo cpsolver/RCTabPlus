@@ -27,14 +27,14 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.BiConsumer;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import network.brightspots.rcv.CastVoteRecord.CvrParseException;
 import network.brightspots.rcv.ContestConfig.Provider;
 import network.brightspots.rcv.ContestConfig.UnrecognizedProviderException;
@@ -56,7 +56,7 @@ class TabulatorSession {
 
     // current date-time formatted as a string used for creating unique output files names
     String baseTimestampString = ZonedDateTime.now()
-        .format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH:mm");
+        .format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH:mm"));
     String currTimestampString = baseTimestampString;
 
     // If there are multiple runs in the same minute, resolve collisions
