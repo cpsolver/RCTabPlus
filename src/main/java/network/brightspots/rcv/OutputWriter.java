@@ -35,10 +35,8 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -49,6 +47,8 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import javafx.util.Pair;
 import network.brightspots.rcv.ContestConfig.TabulateBySlice;
 import network.brightspots.rcv.RawContestConfig.CvrSource;
@@ -916,8 +916,9 @@ class OutputWriter {
     HashMap<String, Object> outputJson = new HashMap<>();
     outputJson.put("CVR", generateCdfMapForCvrs(castVoteRecords));
     outputJson.put("Election", new Map[] {generateCdfMapForElection()});
-    outputJson.put(
-        "GeneratedDate", new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX").format(new Date()));
+    outputJson.put("GeneratedDate",
+        ZonedDateTime.now()
+        .format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:sssss")));
     outputJson.put("GpUnit", generateCdfMapForGpUnits());
     outputJson.put("ReportGeneratingDeviceIds", new String[] {CDF_REPORTING_DEVICE_ID});
     outputJson.put(

@@ -35,15 +35,15 @@ package network.brightspots.rcv;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.logging.FileHandler;
 import java.util.logging.Formatter;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -355,7 +355,7 @@ class Logger {
 
     @Override
     public String format(LogRecord record) {
-      return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z").format(new Date())
+      return ZonedDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss z")
           + " "
           + record.getLevel().getLocalizedName()
           + ": "
