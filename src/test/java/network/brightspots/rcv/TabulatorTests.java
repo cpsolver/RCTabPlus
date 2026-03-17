@@ -80,8 +80,9 @@ class TabulatorTests {
     return succeeded;
   }
 
+  @SuppressWarnings("unchecked")
   private static boolean compareMaps(
-      Map<String, Object> map1, Map<String, Object> map2, List<String> keysToIgnore) {
+        Map<String, Object> map1, Map<String, Object> map2, List<String> keysToIgnore) {
     boolean areEqual = true;
     if (map1.size() != map2.size()) {
       areEqual = false;
@@ -119,6 +120,7 @@ class TabulatorTests {
     return areEqual;
   }
 
+  @SuppressWarnings("unchecked")
   private static boolean compareLists(
       List<Object> value1, List<Object> value2, List<String> keysToIgnoreForMaps) {
     boolean areEqual = true;
