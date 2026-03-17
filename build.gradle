@@ -23,7 +23,7 @@ dependencies {
     implementation 'com.fasterxml.jackson.core:jackson-annotations:2.19.0'
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.19.0'
     implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.19.0'
-    implementation "com.github.spotbugs:spotbugs:6.1.10"
+    implementation "com.github.spotbugs:spotbugs:4.9.3"
 
     testImplementation platform('org.junit:junit-bom:5.12.2')
     testImplementation 'org.junit.jupiter:junit-jupiter-api'
@@ -72,7 +72,7 @@ checkstyle {
 
 spotbugs {
     // Latest version at: https://github.com/spotbugs/spotbugs/tags
-    toolVersion = '6.1.10'
+    toolVersion = '4.9.3'
     excludeFilter = file("config/spotbugs/exclude.xml")
 }
 
