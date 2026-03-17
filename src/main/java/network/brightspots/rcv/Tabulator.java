@@ -105,7 +105,7 @@ final class Tabulator {
   // track which round applies to each pairwise losing candidate
   private final Map<String, Integer> pairwiseLosingRounds = new HashMap<>();
   // track elimination sequence
-  private LinkedList<String> eliminationSequence = new LinkedList();
+  private LinkedList<String> eliminationSequence = new LinkedList<>();
 
   Tabulator(List<CastVoteRecord> castVoteRecords, ContestConfig config)
       throws TabulationAbortedException {
