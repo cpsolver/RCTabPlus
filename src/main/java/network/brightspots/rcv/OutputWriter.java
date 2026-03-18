@@ -918,7 +918,7 @@ class OutputWriter {
     outputJson.put("Election", new Map[] {generateCdfMapForElection()});
     outputJson.put("GeneratedDate",
         ZonedDateTime.now()
-        .format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:sssss")));
+        .format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssXXX")));
     outputJson.put("GpUnit", generateCdfMapForGpUnits());
     outputJson.put("ReportGeneratingDeviceIds", new String[] {CDF_REPORTING_DEVICE_ID});
     outputJson.put(

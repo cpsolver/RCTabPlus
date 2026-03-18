@@ -355,7 +355,7 @@ class Logger {
 
     @Override
     public String format(LogRecord record) {
-      return ZonedDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss z"))
+      return ZonedDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss zzzz"))
           + " "
           + record.getLevel().getLocalizedName()
           + ": "
